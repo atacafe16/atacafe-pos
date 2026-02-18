@@ -6,6 +6,7 @@
     <title>Ata Cafe | Bulut Entegreli Adisyon</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
+    <!-- Firebase Kütüphaneleri -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -202,68 +203,6 @@
         }
         .pin-hata-mesaj.goster { opacity: 1; }
 
-        ::-webkit-scrollbar { width: 5px; }
-
-        /* ===================== PIN EKRANI ===================== */
-        #pin-ekrani {
-            position: fixed; inset: 0; z-index: 9999;
-            background: linear-gradient(135deg, var(--kahve) 0%, var(--kahve-acik) 100%);
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 0;
-        }
-        #pin-ekrani.gizli { display: none; }
-
-        .pin-logo { font-family: 'Playfair Display', serif; font-size: 28px; color: white; margin-bottom: 6px; }
-        .pin-alt { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 32px; font-weight: 600; }
-
-        .pin-kart {
-            background: white; border-radius: 24px; padding: 32px 28px 24px;
-            width: 92%; max-width: 340px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; align-items: center; gap: 0;
-        }
-        .pin-baslik { font-size: 15px; font-weight: 800; color: var(--yazi-acik); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .pin-display {
-            display: flex; gap: 12px; margin-bottom: 24px; min-height: 20px; align-items: center;
-        }
-        .pin-nokta {
-            width: 14px; height: 14px; border-radius: 50%;
-            border: 2px solid #D4B9A8; background: transparent;
-            transition: all 0.2s;
-        }
-        .pin-nokta.dolu { background: var(--kahve); border-color: var(--kahve); transform: scale(1.1); }
-        .pin-nokta.hata { background: var(--kirmizi); border-color: var(--kirmizi); animation: salla 0.4s ease; }
-
-        @keyframes salla {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-6px); }
-            40% { transform: translateX(6px); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(4px); }
-        }
-
-        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-        .pin-btn {
-            aspect-ratio: 1; border: none; border-radius: 50%;
-            background: var(--krem); color: var(--kahve);
-            font-size: 22px; font-weight: 900; font-family: 'Nunito', sans-serif;
-            cursor: pointer; transition: all 0.15s;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(107,58,42,0.1);
-        }
-        .pin-btn:active { transform: scale(0.9); background: var(--sari-acik); }
-        .pin-btn.sil { background: #F0E6E0; font-size: 18px; }
-        .pin-btn.sil:active { background: var(--kirmizi-acik); }
-        .pin-btn.bos { background: transparent; box-shadow: none; cursor: default; }
-
-        .pin-hata-mesaj {
-            font-size: 13px; font-weight: 800; color: var(--kirmizi);
-            margin-top: 14px; min-height: 18px; text-align: center;
-            opacity: 0; transition: opacity 0.2s;
-        }
-        .pin-hata-mesaj.goster { opacity: 1; }
-
         ::-webkit-scrollbar-thumb { background: #D4B9A8; border-radius: 10px; }
         .bolum-ayirici { height: 1px; background: linear-gradient(to right, transparent, #EDE0D4, transparent); margin: 14px 0; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -375,6 +314,11 @@
                 <button class="pin-btn sil" onclick="pinSil()">⌫</button>
             </div>
             <div class="pin-hata-mesaj" id="pin-hata">Hatalı PIN! Tekrar deneyin.</div>
+            
+            <!-- Şifremi Unuttum Eklendi -->
+            <div style="margin-top: 15px; cursor: pointer; color: #8B5A42; font-size: 13px; font-weight: 700; text-decoration: underline;" onclick="sifreSifirlamaGonder()">
+                Şifremi Unuttum
+            </div>
         </div>
     </div>
 
@@ -473,12 +417,9 @@
                 <button class="btn-iptal-zayi" onclick="iptalIsleminiTamamla('zayi')">🗑️ Dokuldu / Zayi Oldu</button>
             </div>
 
-            <div class="modal-butonlar" style="margin-top: 20px; flex-direction: column; gap: 10px;">
-    <button class="modal-iptal" onclick="stokModaliKapat()" style="width: 100%;">✕ Kapat</button>
-    <button onclick="stoklariSifirla()" style="background: #E67E22; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer;">
-        ♻️ Tüm Stokları Sıfırla (Her Şeyi Aç)
-    </button>
-        </div>
+            <div class="modal-butonlar" style="margin-top: 15px;">
+                <button class="modal-iptal" onclick="modalKapat('iptal-modali')" style="width: 100%;">✕ Vazgec</button>
+            </div>
         </div>
     </div>
 
@@ -619,8 +560,12 @@
             
             <div id="stok-listesi" style="max-height: 45vh; overflow-y: auto; padding: 10px 0; text-align: left;"></div>
             
-            <div class="modal-butonlar" style="margin-top: 20px;">
+            <!-- STOK SIFIRLAMA BUTONU EKLENMIS HALI -->
+            <div class="modal-butonlar" style="margin-top: 20px; flex-direction: column; gap: 10px;">
                 <button class="modal-iptal" onclick="stokModaliKapat()" style="width: 100%;">✕ Kapat</button>
+                <button onclick="stoklariSifirla()" style="background: #E67E22; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer;">
+                    ♻️ Tüm Stokları Sıfırla (Her Şeyi Aç)
+                </button>
             </div>
         </div>
     </div>
@@ -737,32 +682,53 @@
             { ad: "Su", fiyat: 25 }, { ad: "Kola Turka", fiyat: 90 }, { ad: "Sade Soda", fiyat: 50 }
         ];
 
-        // Sihirli Menu - Stok Urunleri (Guncellendi)
+        // Sihirli Menu - Stok Urunleri (Guncellenmis & Ayristirilmis Liste)
+        // Bu isimler QR Menüdeki "data-urun-id"leri oluşturur. Harfi harfine uymalıdır.
         const menuUrunleri = [
-            "Çay", "Fincan Çay", 
-            "Oralet Portakal", "Oralet Kivi", 
-            "Türk Kahvesi", 
+            // --- SICAKLAR ---
+            "Çay", "Fincan Çay",
+            "Oralet Portakal", "Oralet Kivi", "Oralet Tarçın", "Oralet Muz", 
+            "Oralet Karadut", "Oralet Nanelimon", "Oralet Kakao", "Oralet Kuşburnu",
+            
+            "Türk Kahvesi", "Sütlü Türk Kahvesi", "Menengiç Kahvesi", 
+            "Dibek Kahvesi", "Damla Sakızlı Türk Kahvesi",
+            
+            // ARTIK HEPSİ AYRI AYRI
             "Nescafe", "Sütlü Nescafe", 
-            "Filtre Kahve", "Bitki Çayları", "Salep", "Sıcak Çikolata",
-            "Tostlar", "Gözlemeler", "Sucuk Ekmek", 
-            "Tatlı Çeşitleri", 
-            "Su", "Kola Turka", "Limonata", "Uludağ Gazoz", 
-            "Vişne Suyu", 
-            "Meyve Suları", "Sodalar", "Küçük Ayran",
-            "Ice Americano", "Ice Latte", "Churchill",
-            "Tuzlu Fıstık", "Karışık Çerez", "Çekirdek (Küçük)", "Çekirdek (Büyük)"
+            "Filtre Kahve", 
+            "Bardak Salep", "Bardak Nescafe", 
+            
+            "Ihlamur", "Ada Çayı", "Yeşil Çay", 
+            "Salep", "Sıcak Çikolata", 
+            "Sıcak Ballı Süt", "Sıcak Süt",
+
+            // --- YIYECEKLER ---
+            "Sucuk Kaşarlı Tost", "Sade Kaşarlı Tost", "Sade Sucuklu Tost",
+            "Sucuk Kaşarlı Gözleme", "Sade Kaşarlı Gözleme", "Sade Sucuklu Gözleme", 
+            "Sade Patatesli Gözleme", "Patates Kaşarlı Gözleme", "Gözleme (Full Karışık)",
+            "Sucuk Ekmek",
+
+            // --- TATLILAR & ATISTIRMALIK ---
+            "Tatlı Çeşitleri",
+            "Tuzlu Fıstık", "Karışık Çerez", "Çekirdek (Küçük)", "Çekirdek (Büyük)",
+
+            // --- SOGUKLAR ---
+            "Su", "Ice Americano", "Ice Latte", "Churchill", 
+            "Kola Turka", "Limonata", "Uludağ Gazoz", 
+            "Vişne Suyu", "Şeftali Suyu", "Karışık Meyve Suyu",
+            "Kutu Vişne", "Kutu Şeftali", 
+            "Limonlu Soda", "Elmalı Soda", "Narlı Soda", "Karpuz Çilek Soda", "Sade Soda",
+            "Küçük Ayran"
         ];
 
         // =============================================
-        // PIN SİSTEMİ
+        // PIN SİSTEMİ (GUVENLI HIBRIT MOD)
         // =============================================
-        const GARSON_PIN = '4321';   // 4 rakam - garson
-        const KASA_PIN   = '495137'; // 6 rakam - kasa
-
         let pinGirilen = '';
         let pinModu = '';
 
         function pinBaslat() {
+            // Ekran genişliğine göre Garson mu Kasa mı olduğunu anla
             if (window.innerWidth <= 768) {
                 pinModu = 'garson';
                 document.getElementById('pin-baslik').innerText = 'Garson PIN (4 hane)';
@@ -797,12 +763,30 @@
         }
 
         function pinKontrol() {
-            let dogru = pinModu === 'garson' ? GARSON_PIN : KASA_PIN;
-            if (pinGirilen === dogru) {
-                // Firebase anonim giriş yap
-                firebase.auth().signInAnonymously().catch(e => console.log('Auth:', e));
-                document.getElementById('pin-ekrani').classList.add('gizli');
+            let email, password;
+
+            if (pinModu === 'garson') {
+                // Garson modundaysa (Mobil)
+                email = "garson@atacafe.com";
+                // Firebase en az 6 karakter ister, ama garson 4 hane giriyor.
+                // ÇÖZÜM: Garsonun girdigi 4 haneli PIN'in arkasina '00' ekliyoruz.
+                password = pinGirilen + "00";
             } else {
+                // Kasa modundaysa (Desktop)
+                email = "kasa@atacafe.com";
+                password = pinGirilen; // Zaten 6 hane
+            }
+
+            // Firebase Email/Sifre ile Giris Yap (Kodda sifre yazmiyor!)
+            firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Giris basarili
+                document.getElementById('pin-ekrani').classList.add('gizli');
+                toastGoster("✅ Giriş Başarılı!");
+            })
+            .catch((error) => {
+                // Sifre yanlissa
+                console.error("Giris hatasi:", error);
                 document.querySelectorAll('.pin-nokta').forEach(n => n.classList.add('hata'));
                 document.getElementById('pin-hata').classList.add('goster');
                 setTimeout(() => {
@@ -811,7 +795,7 @@
                     document.querySelectorAll('.pin-nokta').forEach(n => n.classList.remove('hata'));
                     document.getElementById('pin-hata').classList.remove('goster');
                 }, 800);
-            }
+            });
         }
 
         document.addEventListener('keydown', function(e) {
@@ -819,6 +803,24 @@
             if (e.key >= '0' && e.key <= '9') pinGir(e.key);
             else if (e.key === 'Backspace') pinSil();
         });
+
+        function sifreSifirlamaGonder() {
+            // 1. O anki moda göre maili belirle
+            let email = (pinModu === 'garson') ? "garson@atacafe.com" : "kasa@atacafe.com";
+            
+            // 2. Kullanıcıdan onay al
+            if(!confirm(email + " adresine şifre sıfırlama linki gönderilsin mi?")) return;
+
+            // 3. Firebase'e söyle
+            firebase.auth().sendPasswordResetEmail(email)
+                .then(() => {
+                    alert("✅ Sıfırlama bağlantısı e-posta adresine gönderildi!\nLütfen gelen kutunu (ve spam klasörünü) kontrol et.");
+                })
+                .catch((error) => {
+                    console.error(error);
+                    alert("❌ Hata: " + error.message);
+                });
+        }
 
         // ============================================
         // PUSH BİLDİRİM
@@ -854,7 +856,13 @@
             baglantiDurumunuIzle();
             hazirSiparisleriDinle();
 
-            window.addEventListener('resize', () => mobilMod = window.innerWidth <= 768);
+            window.addEventListener('resize', () => {
+                mobilMod = window.innerWidth <= 768;
+                // Pin modunu guncelle (Eger hala giris yapilmadiysa)
+                if(!document.getElementById('pin-ekrani').classList.contains('gizli')) {
+                    pinBaslat();
+                }
+            });
             window.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('goster');
             });
@@ -1639,6 +1647,21 @@
         }
 
         function stokModaliKapat() { document.getElementById('stok-modali').classList.remove('goster'); }
+
+        // STOKLARI SIFIRLAMA FONKSIYONU (YENI EKLENDI)
+        function stoklariSifirla() {
+            if(!confirm("Dikkat! Bütün 'Tükendi' işaretleri kaldırılacak ve tüm ürünler 'Stokta Var' olacak.\nOnaylıyor musun?")) return;
+            
+            // Veritabanındaki 'menuDurum' klasörünü tamamen siler (Her şey varsayılan olarak 'Var' olur)
+            db.ref('menuDurum').remove()
+            .then(() => {
+                stokModaliAc(); // Listeyi yenile
+                toastGoster("✅ Tüm stoklar sıfırlandı! Her şey satışta.");
+            })
+            .catch(err => {
+                alert("Hata: " + err.message);
+            });
+        }
 
         // ============================================
         // YARDIMCI VE INDIRME FONKSIYONLARI
