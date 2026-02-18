@@ -670,20 +670,37 @@
             { ad: "Su", fiyat: 25 }, { ad: "Kola Turka", fiyat: 90 }, { ad: "Sade Soda", fiyat: 50 }
         ];
 
-        // Sihirli Menu - Stok Urunleri (Guncellendi)
+        // Sihirli Menu - Stok Urunleri (Guncellenmis Detayli Liste)
+        // Buradaki isimler QR Menudeki "data-urun-id"leri olusturacak sekilde yazilmistir.
         const menuUrunleri = [
-            "Çay", "Fincan Çay", 
-            "Oralet Portakal", "Oralet Kivi", 
-            "Türk Kahvesi", 
-            "Nescafe", "Sütlü Nescafe", 
-            "Filtre Kahve", "Bitki Çayları", "Salep", "Sıcak Çikolata",
-            "Tostlar", "Gözlemeler", "Sucuk Ekmek", 
-            "Tatlı Çeşitleri", 
-            "Su", "Kola Turka", "Limonata", "Uludağ Gazoz", 
-            "Vişne Suyu", 
-            "Meyve Suları", "Sodalar", "Küçük Ayran",
-            "Ice Americano", "Ice Latte", "Churchill",
-            "Tuzlu Fıstık", "Karışık Çerez", "Çekirdek (Küçük)", "Çekirdek (Büyük)"
+            // --- SICAKLAR ---
+            "Çay", "Fincan Çay",
+            "Oralet Portakal", "Oralet Kivi", "Oralet Tarçın", "Oralet Muz", 
+            "Oralet Karadut", "Oralet Nanelimon", "Oralet Kakao", "Oralet Kuşburnu",
+            "Türk Kahvesi", "Sütlü Türk Kahvesi", "Menengiç Kahvesi", 
+            "Dibek Kahvesi", "Damla Sakızlı Türk Kahvesi",
+            "Nescafe", "Sütlü Nescafe", "Filtre Kahve", "Bardak Nescafe",
+            "Ihlamur", "Ada Çayı", "Yeşil Çay", 
+            "Salep", "Sıcak Çikolata", "Bardak Salep", 
+            "Sıcak Süt", "Sıcak Ballı Süt",
+
+            // --- YIYECEKLER ---
+            "Sucuk Kaşarlı Tost", "Sade Kaşarlı Tost", "Sade Sucuklu Tost",
+            "Sucuk Kaşarlı Gözleme", "Sade Kaşarlı Gözleme", "Sade Sucuklu Gözleme", 
+            "Sade Patatesli Gözleme", "Patates Kaşarlı Gözleme", "Gözleme (Full Karışık)",
+            "Sucuk Ekmek",
+
+            // --- TATLILAR & ATISTIRMALIK ---
+            "Tatlı Çeşitleri",
+            "Tuzlu Fıstık", "Karışık Çerez", "Çekirdek (Küçük)", "Çekirdek (Büyük)",
+
+            // --- SOGUKLAR ---
+            "Su", "Ice Americano", "Ice Latte", "Churchill", 
+            "Kola Turka", "Limonata", "Uludağ Gazoz", 
+            "Vişne Suyu", "Şeftali Suyu", "Karışık Meyve Suyu",
+            "Kutu Vişne", "Kutu Şeftali", // QR menude "Kutu Vişne Suyu" degil "Kutu Vişne" ID'si var
+            "Limonlu Soda", "Elmalı Soda", "Narlı Soda", "Karpuz Çilek Soda", "Sade Soda",
+            "Küçük Ayran"
         ];
 
         // =============================================
