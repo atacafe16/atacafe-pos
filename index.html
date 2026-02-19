@@ -673,13 +673,43 @@
         let bekleyenIptalUrun = ""; 
 
         const menumuz = [
+            // SICAKLAR
             { ad: "Çay", fiyat: 25 }, { ad: "Fincan Çay", fiyat: 50 },
-            { ad: "Oralet (Portakal)", fiyat: 25 }, { ad: "Oralet (Kivi)", fiyat: 25 },
-            { ad: "Türk Kahvesi", fiyat: 80 }, { ad: "Nescafe", fiyat: 100 },
-            { ad: "Filtre Kahve", fiyat: 120 }, { ad: "Salep", fiyat: 100 },
-            { ad: "Sucuk Kaşarlı Tost", fiyat: 120 }, { ad: "Sade Kaşarlı Gözleme", fiyat: 180 },
-            { ad: "Gözleme (Full Karışık)", fiyat: 200 }, { ad: "Tatlı Çeşitleri", fiyat: 120 },
-            { ad: "Su", fiyat: 25 }, { ad: "Kola Turka", fiyat: 90 }, { ad: "Sade Soda", fiyat: 50 }
+            { ad: "Oralet Portakal", fiyat: 25 }, { ad: "Oralet Kivi", fiyat: 25 },
+            { ad: "Oralet Tarçın", fiyat: 25 }, { ad: "Oralet Muz", fiyat: 25 },
+            { ad: "Oralet Karadut", fiyat: 25 }, { ad: "Oralet Nanelimon", fiyat: 25 },
+            { ad: "Oralet Kakao", fiyat: 25 }, { ad: "Oralet Kuşburnu", fiyat: 25 },
+            { ad: "Türk Kahvesi", fiyat: 80 }, { ad: "Sütlü Türk Kahvesi", fiyat: 80 },
+            { ad: "Menengiç Kahvesi", fiyat: 90 }, { ad: "Dibek Kahvesi", fiyat: 90 },
+            { ad: "Damla Sakızlı Türk Kahvesi", fiyat: 90 },
+            { ad: "Nescafe", fiyat: 100 }, { ad: "Sütlü Nescafe", fiyat: 100 },
+            { ad: "Filtre Kahve", fiyat: 120 },
+            { ad: "Bardak Salep", fiyat: 100 }, { ad: "Bardak Nescafe", fiyat: 100 },
+            { ad: "Ihlamur", fiyat: 50 }, { ad: "Ada Çayı", fiyat: 50 }, { ad: "Yeşil Çay", fiyat: 50 },
+            { ad: "Salep", fiyat: 100 }, { ad: "Sıcak Çikolata", fiyat: 100 },
+            { ad: "Sıcak Ballı Süt", fiyat: 80 }, { ad: "Sıcak Süt", fiyat: 60 },
+            // YİYECEKLER
+            { ad: "Sucuk Kaşarlı Tost", fiyat: 120 }, { ad: "Sade Kaşarlı Tost", fiyat: 100 },
+            { ad: "Sade Sucuklu Tost", fiyat: 110 },
+            { ad: "Sucuk Kaşarlı Gözleme", fiyat: 200 }, { ad: "Sade Kaşarlı Gözleme", fiyat: 180 },
+            { ad: "Sade Sucuklu Gözleme", fiyat: 190 }, { ad: "Sade Patatesli Gözleme", fiyat: 160 },
+            { ad: "Patates Kaşarlı Gözleme", fiyat: 180 }, { ad: "Gözleme (Full Karışık)", fiyat: 200 },
+            { ad: "Sucuk Ekmek", fiyat: 90 },
+            // TATLILAR & ATIŞTIIRMALIK
+            { ad: "Tatlı Çeşitleri", fiyat: 120 },
+            { ad: "Tuzlu Fıstık", fiyat: 80 }, { ad: "Karışık Çerez", fiyat: 80 },
+            { ad: "Çekirdek (Küçük)", fiyat: 50 }, { ad: "Çekirdek (Büyük)", fiyat: 90 },
+            // SOĞUKLAR
+            { ad: "Su", fiyat: 25 }, { ad: "Ice Americano", fiyat: 120 },
+            { ad: "Ice Latte", fiyat: 130 }, { ad: "Churchill", fiyat: 130 },
+            { ad: "Kola Turka", fiyat: 90 }, { ad: "Limonata", fiyat: 80 },
+            { ad: "Uludağ Gazoz", fiyat: 70 },
+            { ad: "Vişne Suyu", fiyat: 70 }, { ad: "Şeftali Suyu", fiyat: 70 },
+            { ad: "Karışık Meyve Suyu", fiyat: 70 },
+            { ad: "Kutu Vişne", fiyat: 60 }, { ad: "Kutu Şeftali", fiyat: 60 },
+            { ad: "Limonlu Soda", fiyat: 50 }, { ad: "Elmalı Soda", fiyat: 50 },
+            { ad: "Narlı Soda", fiyat: 50 }, { ad: "Karpuz Çilek Soda", fiyat: 50 },
+            { ad: "Sade Soda", fiyat: 50 }, { ad: "Küçük Ayran", fiyat: 40 }
         ];
 
         // Sihirli Menu - Stok Urunleri (Guncellenmis & Ayristirilmis Liste)
@@ -867,6 +897,7 @@
                 if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('goster');
             });
             document.body.addEventListener('click', function() { window.sesAktif = true; }, {once: true});
+            window.sesAktif = true; // Başlangıçta aktif et
         };
 
         // Firebase'den masa kapasitesini oku, yoksa varsayılan kullan
