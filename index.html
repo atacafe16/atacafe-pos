@@ -351,9 +351,12 @@
         <div class="panel sol-panel mobil-sayfa aktif-sayfa" id="sayfa-masalar">
             <div class="panel-baslik">🪑 Masalar</div>
             <div class="panel-icerik">
-                <div class="arama-kutu">
-                    <span class="arama-ikon">🔍</span>
-                    <input type="text" id="masa-arama-input" onkeyup="masaAra()" placeholder="Masa ara... (S5, B12)">
+                <div class="arama-kutu" style="display:flex; gap:8px; align-items:center;">
+                    <div style="position:relative; flex:1;">
+                        <span class="arama-ikon">🔍</span>
+                        <input type="text" id="masa-arama-input" onkeyup="masaAra()" placeholder="Masa ara... (S5, B12)">
+                    </div>
+                    <button id="ses-btn-masa" onclick="sesliMasaArama()" title="Sesli Ara" style="width:42px; height:42px; border-radius:50%; border:2px solid #EDE0D4; background:var(--krem); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;">🎤</button>
                 </div>
                 <div class="masalar-grid" id="masalar-alani"></div>
             </div>
@@ -1404,6 +1407,43 @@
             };
 
             sesliDinleme.start();
+        }
+
+
+        function sesliMasaArama() {
+            if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                toastGoster('Bu tarayici sesli aramayı desteklemiyor!', true); return;
+            }
+
+            let btn = document.getElementById('ses-btn-masa');
+            let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let sr = new SR();
+            sr.lang = 'tr-TR';
+            sr.interimResults = false;
+
+            btn.style.background = '#E74C3C';
+            btn.style.color = 'white';
+            btn.innerText = '⏹️';
+
+            sr.onresult = function(event) {
+                let metin = event.results[0][0].transcript;
+                let input = document.getElementById('masa-arama-input');
+                input.value = metin;
+                masaAra();
+                toastGoster('🎤 "' + metin + '" arandı');
+            };
+
+            sr.onerror = function(event) {
+                if(event.error !== 'aborted') toastGoster('Ses tanıma hatası!', true);
+            };
+
+            sr.onend = function() {
+                btn.style.background = 'var(--krem)';
+                btn.style.color = '';
+                btn.innerText = '🎤';
+            };
+
+            sr.start();
         }
 
         function urunAra() {
