@@ -279,6 +279,12 @@
             /* GARSON ICIN EKSI (-) TUSUNU GIZLE */
             .adet-btn.eksi { display: none !important; }
             
+            /* KASİYER MODU - mobil kısıtlamalar kalkar */
+            body.kasiyer-aktif .odeme-kutusu { display: block !important; }
+            body.kasiyer-aktif .sekme-menusu { display: flex !important; flex-wrap: wrap; gap: 8px; }
+            body.kasiyer-aktif .adet-btn.eksi { display: flex !important; }
+            body.kasiyer-aktif .btn-masa-tasi { display: inline-block !important; }
+            
             .mobil-alt-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 2px solid #EDE0D4; z-index: 500; padding: 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); }
             .mobil-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; background: none; border: none; font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700; color: var(--yazi-acik); cursor: pointer; position: relative;}
             .mobil-nav-btn .nav-ikon { font-size: 22px; margin-bottom: 2px; }
@@ -859,10 +865,9 @@
                     .then((userCredential) => {
                         kasiyerMod = true;
                         mobilMod = false; // Kasiyer tam yetkili
+                        document.body.classList.add('kasiyer-aktif');
                         document.getElementById('pin-ekrani').classList.add('gizli');
                         toastGoster("✅ Kasiyer Girişi Başarılı!");
-                        // mobilMod'un false kalması için küçük gecikme
-                        setTimeout(() => { mobilMod = false; }, 500);
                     })
                     .catch(() => {
                         // İkisi de yanlış
@@ -1481,6 +1486,9 @@
             aktifMasaId = id;
             document.getElementById('masa-'+id)?.classList.add('secili');
             document.getElementById('secili-masa-baslik').innerText = "Masa " + id;
+            // Kasiyer rozetini göster
+            let rozetEl = document.getElementById('kasiyer-rozet');
+            if(kasiyerMod && rozetEl) rozetEl.style.display = 'inline-block';
             if(!mobilMod) document.getElementById('btn-masa-tasi').style.display = 'inline-block';
             document.getElementById('masa-secilmedi-mesaji').style.display = "none";
             document.getElementById('siparis-alani').style.display = "block";
