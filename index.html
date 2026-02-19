@@ -1492,7 +1492,7 @@
             document.getElementById('masa-secilmedi-mesaji').style.display = "none";
             document.getElementById('siparis-alani').style.display = "block";
             adisyonuGuncelle();
-            if (mobilMod) mobilSayfaDegistir('siparis');
+            if (mobilMod || kasiyerMod) mobilSayfaDegistir('siparis');
         }
 
         function siparisEkle(ad, fiyat) {
@@ -1506,7 +1506,7 @@
             else { m.siparisler.push({urun: ad, birimFiyat: fiyat, toplamTutar: fiyat, adet: 1, teslimEdilen: 0}); }
             m.toplam = (m.toplam || 0) + fiyat;
             db.ref('masalar/'+aktifMasaId).set(m);
-            if(mobilMod) mobilEklendiAnimasyonu(ad);
+            if(mobilMod || kasiyerMod) mobilEklendiAnimasyonu(ad);
         }
 
         function urunArttir(ad) {
@@ -1553,7 +1553,7 @@
         }
 
         function mobilBadgeGuncelle() {
-            if(!mobilMod) return;
+            if(!mobilMod && !kasiyerMod) return;
             const b = document.getElementById('siparis-badge');
             let adet = (masalarData[aktifMasaId]?.siparisler || []).reduce((t,s)=>t+s.adet,0);
             b.style.display = adet > 0 ? 'flex' : 'none'; b.textContent = adet;
