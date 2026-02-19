@@ -701,6 +701,7 @@
         let arsivGunluk = [], arsivAylik = [], arsivYillik = [];
         let firebaseHazir = false; 
         let mobilMod = window.innerWidth <= 768;
+        let kasiyerMod = false; // Kasiyer girişinde true olur - mobil ama tam yetkili
         
         let ilkYukleme = true;
         let eskiSiparisAdetleri = {}; 
@@ -834,35 +835,51 @@
             let email, password;
 
             if (pinModu === 'garson') {
-                // Garson modundaysa (Mobil)
+                // Önce garson olarak dene
                 email = "garson@atacafe.com";
-                // Firebase en az 6 karakter ister, ama garson 4 hane giriyor.
-                // ÇÖZÜM: Garsonun girdigi 4 haneli PIN'in arkasina '00' ekliyoruz.
                 password = pinGirilen + "00";
             } else {
-                // Kasa modundaysa (Desktop)
                 email = "kasa@atacafe.com";
-                password = pinGirilen; // Zaten 6 hane
+                password = pinGirilen;
             }
 
-            // Firebase Email/Sifre ile Giris Yap (Kodda sifre yazmiyor!)
             firebase.auth().signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
-                // Giris basarili
+                kasiyerMod = false;
                 document.getElementById('pin-ekrani').classList.add('gizli');
                 toastGoster("✅ Giriş Başarılı!");
             })
             .catch((error) => {
-                // Sifre yanlissa
-                console.error("Giris hatasi:", error);
-                document.querySelectorAll('.pin-nokta').forEach(n => n.classList.add('hata'));
-                document.getElementById('pin-hata').classList.add('goster');
-                setTimeout(() => {
-                    pinGirilen = '';
-                    pinDisplayGuncelle(pinModu === 'garson' ? 4 : 6);
-                    document.querySelectorAll('.pin-nokta').forEach(n => n.classList.remove('hata'));
-                    document.getElementById('pin-hata').classList.remove('goster');
-                }, 800);
+                // Garson PIN yanlışsa kasiyer olarak dene
+                if (pinModu === 'garson') {
+                    firebase.auth().signInWithEmailAndPassword("kasiyer@atacafe.com", pinGirilen + "00")
+                    .then((userCredential) => {
+                        kasiyerMod = true;
+                        mobilMod = false; // Kasiyer tam yetkili
+                        document.getElementById('pin-ekrani').classList.add('gizli');
+                        toastGoster("✅ Kasiyer Girişi Başarılı!");
+                    })
+                    .catch(() => {
+                        // İkisi de yanlış
+                        document.querySelectorAll('.pin-nokta').forEach(n => n.classList.add('hata'));
+                        document.getElementById('pin-hata').classList.add('goster');
+                        setTimeout(() => {
+                            pinGirilen = '';
+                            pinDisplayGuncelle(4);
+                            document.querySelectorAll('.pin-nokta').forEach(n => n.classList.remove('hata'));
+                            document.getElementById('pin-hata').classList.remove('goster');
+                        }, 800);
+                    });
+                } else {
+                    document.querySelectorAll('.pin-nokta').forEach(n => n.classList.add('hata'));
+                    document.getElementById('pin-hata').classList.add('goster');
+                    setTimeout(() => {
+                        pinGirilen = '';
+                        pinDisplayGuncelle(6);
+                        document.querySelectorAll('.pin-nokta').forEach(n => n.classList.remove('hata'));
+                        document.getElementById('pin-hata').classList.remove('goster');
+                    }, 800);
+                }
             });
         }
 
@@ -925,7 +942,7 @@
             hazirSiparisleriDinle();
 
             window.addEventListener('resize', () => {
-                mobilMod = window.innerWidth <= 768;
+                if(!kasiyerMod) mobilMod = window.innerWidth <= 768;
                 // Pin modunu guncelle (Eger hala giris yapilmadiysa)
                 if(!document.getElementById('pin-ekrani').classList.contains('gizli')) {
                     pinBaslat();
