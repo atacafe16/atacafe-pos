@@ -1379,7 +1379,7 @@
         function mobilSayfaDegistir(sayfa) {
             document.querySelectorAll('.mobil-sayfa').forEach(e => {
                 e.classList.remove('aktif-sayfa');
-                e.style.display = 'none';
+                if(!e.classList.contains('modal-overlay')) e.style.display = 'none';
             });
             document.querySelectorAll('.mobil-nav-btn').forEach(e => e.classList.remove('aktif'));
             let sayfaEl = document.getElementById('sayfa-'+sayfa);
@@ -1920,6 +1920,8 @@
                 });
             };
             f(arsivGunluk, 'arsiv-listesi', 'gunluk'); f(arsivAylik, 'aylik-arsiv-listesi', 'aylik'); f(arsivYillik, 'yillik-arsiv-listesi', 'yillik');
+            // Mobil listelerini de güncelle
+            f(arsivGunluk, 'arsiv-listesi-mobil', 'gunluk'); f(arsivAylik, 'aylik-arsiv-listesi-mobil', 'aylik'); f(arsivYillik, 'yillik-arsiv-listesi-mobil', 'yillik');
         }
 
         function arsivDetayGoster(tur, idx) {
