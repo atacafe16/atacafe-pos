@@ -858,6 +858,8 @@
                         mobilMod = false; // Kasiyer tam yetkili
                         document.getElementById('pin-ekrani').classList.add('gizli');
                         toastGoster("✅ Kasiyer Girişi Başarılı!");
+                        // mobilMod'un false kalması için küçük gecikme
+                        setTimeout(() => { mobilMod = false; }, 500);
                     })
                     .catch(() => {
                         // İkisi de yanlış
@@ -942,7 +944,9 @@
             hazirSiparisleriDinle();
 
             window.addEventListener('resize', () => {
+                // kasiyerMod aktifse mobilMod'u değiştirme
                 if(!kasiyerMod) mobilMod = window.innerWidth <= 768;
+                else mobilMod = false;
                 // Pin modunu guncelle (Eger hala giris yapilmadiysa)
                 if(!document.getElementById('pin-ekrani').classList.contains('gizli')) {
                     pinBaslat();
