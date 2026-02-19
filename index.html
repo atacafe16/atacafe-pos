@@ -262,7 +262,7 @@
 
         /* ===================== MOBIL ===================== */
         .mobil-alt-nav { display: none; }
-        /* sayfa-arsiv mobilde aktif-sayfa classı ile açılır */
+
         @media (max-width: 768px) {
             body { padding: 0; padding-bottom: 80px; background: #F8F1E8; }
             .site-header { background: linear-gradient(135deg, var(--kahve) 0%, var(--kahve-acik) 100%); padding: 16px 16px 12px; margin-bottom: 0; position: sticky; top: 0; z-index: 100; }
@@ -273,7 +273,7 @@
             .panel { border-radius: 0; box-shadow: none; border-bottom: 1px solid #EDE0D4; }
             .sol-panel { width: 100%; } .orta-panel { width: 100%; }
             .masalar-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: none; overflow-y: visible; }
-            .mobil-sayfa { display: none; } .mobil-sayfa.aktif-sayfa { display: block; }
+            .mobil-sayfa { display: none !important; } .mobil-sayfa.aktif-sayfa { display: block !important; }
             .odeme-kutusu { display: none !important; } 
             .btn-masa-tasi { display: none !important; } 
             
@@ -1377,13 +1377,10 @@
         }
 
         function mobilSayfaDegistir(sayfa) {
-            document.querySelectorAll('.mobil-sayfa').forEach(e => {
-                e.classList.remove('aktif-sayfa');
-                if(!e.classList.contains('modal-overlay')) e.style.display = 'none';
-            });
+            document.querySelectorAll('.mobil-sayfa').forEach(e => e.classList.remove('aktif-sayfa'));
             document.querySelectorAll('.mobil-nav-btn').forEach(e => e.classList.remove('aktif'));
             let sayfaEl = document.getElementById('sayfa-'+sayfa);
-            if(sayfaEl) { sayfaEl.classList.add('aktif-sayfa'); sayfaEl.style.display = 'block'; }
+            if(sayfaEl) sayfaEl.classList.add('aktif-sayfa');
             let navEl = document.getElementById('nav-'+sayfa);
             if(navEl) navEl.classList.add('aktif');
         }
