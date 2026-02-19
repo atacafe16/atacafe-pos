@@ -420,7 +420,7 @@
 
 
     <!-- MOBİL ARŞİV SAYFASI -->
-    <div class="panel mobil-sayfa" id="sayfa-arsiv" style="padding: 16px; overflow-y: auto; padding-bottom: 80px;">
+    <div class="panel mobil-sayfa" id="sayfa-arsiv" style="padding: 16px; overflow-y: auto; padding-bottom: 80px; display: none;">
         <div class="panel-baslik" style="margin: -16px -16px 16px; border-radius: 0;">🗂️ Arsiv & Kapatma</div>
         
         <!-- Bugünün Cirosu -->
@@ -1393,6 +1393,8 @@
             alan.innerHTML += `<div class="masa-bolge-ayirici"></div>`;
             alan.innerHTML += `<div class="masa-bolge-baslik">🌿 Bahçe</div>`;
             for (let i = 1; i <= bahceSayisi; i++) alan.innerHTML += `<div class="masa-kutu" id="masa-B${i}" onclick="masaSec('B${i}')">B${i}</div>`;
+            // DOM hazır olunca renkleri uygula
+            if(Object.keys(masalarData).length > 0) masalariRenklendir();
         }
 
         function urunleriOlustur() {
