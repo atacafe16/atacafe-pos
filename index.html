@@ -1483,7 +1483,7 @@
         }
 
         function masaSec(id) {
-            if(!firebaseHazir) return;
+            if(!firebaseHazir && !kasiyerMod) return;
             if(aktifMasaId) document.getElementById('masa-'+aktifMasaId)?.classList.remove('secili');
             aktifMasaId = id;
             document.getElementById('masa-'+id)?.classList.add('secili');
