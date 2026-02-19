@@ -210,7 +210,7 @@
         @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ===================== MODALLAR ===================== */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(61,35,20,0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(61,35,20,0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; will-change: opacity; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
         .modal-overlay.goster { opacity: 1; pointer-events: all; }
         .modal-kart { background: white; border-radius: 20px; padding: 32px 28px 24px; max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(61,35,20,0.25); transform: translateY(20px) scale(0.97); transition: transform 0.25s ease; text-align: center; }
         .modal-overlay.goster .modal-kart { transform: translateY(0) scale(1); }
@@ -273,7 +273,7 @@
             .panel { border-radius: 0; box-shadow: none; border-bottom: 1px solid #EDE0D4; }
             .sol-panel { width: 100%; } .orta-panel { width: 100%; }
             .masalar-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: none; overflow-y: visible; }
-            .mobil-sayfa { display: none !important; }
+            .mobil-sayfa { display: none !important; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
             .mobil-sayfa.aktif-sayfa { display: block !important; }
             .odeme-kutusu { display: none !important; } 
             .btn-masa-tasi { display: none !important; } 
@@ -1083,7 +1083,11 @@
                 masalariRenklendir(); 
 
                 if (aktifMasaId && masalarData[aktifMasaId]) {
-                    adisyonuGuncelle(); mobilBadgeGuncelle();
+                    // Stok modali açıkken adisyon güncellemesini atla (yanıp sönmeyi önler)
+                    if(!document.getElementById('stok-modali').classList.contains('goster')) {
+                        adisyonuGuncelle(); 
+                    }
+                    mobilBadgeGuncelle();
                 }
                 ciroEkraniGuncelle(); arsivleriYukleUI();
                 }); // db.ref kapanış
@@ -1378,12 +1382,22 @@
         }
 
         function mobilSayfaDegistir(sayfa) {
+            // Stok modali açıksa önce kapat (yanıp sönmeyi önler)
+            let stokModal = document.getElementById('stok-modali');
+            if(stokModal.classList.contains('goster')) {
+                stokModal.classList.remove('goster');
+            }
+            
             // Önce yeni sayfayı göster, sonra eskisini gizle (beyazlama önlenir)
             let sayfaEl = document.getElementById('sayfa-'+sayfa);
             if(sayfaEl) sayfaEl.classList.add('aktif-sayfa');
-            document.querySelectorAll('.mobil-sayfa').forEach(e => {
-                if(e.id !== 'sayfa-'+sayfa) e.classList.remove('aktif-sayfa');
+            
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.mobil-sayfa').forEach(e => {
+                    if(e.id !== 'sayfa-'+sayfa) e.classList.remove('aktif-sayfa');
+                });
             });
+            
             document.querySelectorAll('.mobil-nav-btn').forEach(e => e.classList.remove('aktif'));
             let navEl = document.getElementById('nav-'+sayfa);
             if(navEl) navEl.classList.add('aktif');
@@ -2001,7 +2015,16 @@
 
         function stokDurumuGuncelle(urunId, durum) {
             db.ref('menuDurum/' + urunId).set(durum).then(() => {
-                stokModaliAc(); // Ekrani yenile
+                // Sadece ilgili butonu güncelle, tüm listeyi yeniden çizme (yanıp sönmeyi önler)
+                let liste = document.getElementById('stok-listesi');
+                let butonlar = liste.querySelectorAll('button');
+                butonlar.forEach(btn => {
+                    if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'" + urunId + "'")) {
+                        btn.style.background = durum ? '#2F4A3A' : '#D9381E';
+                        btn.innerText = durum ? 'Stokta Var' : 'Tukendi';
+                        btn.setAttribute('onclick', `stokDurumuGuncelle('${urunId}', ${!durum})`);
+                    }
+                });
                 toastGoster(durum ? 'Urun stoga eklendi!' : 'Urun tukendi olarak isaretlendi!', !durum);
             }); 
         }
@@ -2012,10 +2035,20 @@
         function stoklariSifirla() {
             if(!confirm("Dikkat! Bütün 'Tükendi' işaretleri kaldırılacak ve tüm ürünler 'Stokta Var' olacak.\nOnaylıyor musun?")) return;
             
-            // Veritabanındaki 'menuDurum' klasörünü tamamen siler (Her şey varsayılan olarak 'Var' olur)
             db.ref('menuDurum').remove()
             .then(() => {
-                stokModaliAc(); // Listeyi yenile
+                // Listeyi yerel olarak güncelle (tam yeniden çizim yerine)
+                let liste = document.getElementById('stok-listesi');
+                let butonlar = liste.querySelectorAll('button');
+                butonlar.forEach(btn => {
+                    btn.style.background = '#2F4A3A';
+                    btn.innerText = 'Stokta Var';
+                    // onclick'i güncelle - şimdi hepsi true -> false'a çevrilecek
+                    let onclickStr = btn.getAttribute('onclick');
+                    if(onclickStr) {
+                        btn.setAttribute('onclick', onclickStr.replace(/true|false/, 'false'));
+                    }
+                });
                 toastGoster("✅ Tüm stoklar sıfırlandı! Her şey satışta.");
             })
             .catch(err => {
