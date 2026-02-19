@@ -278,12 +278,10 @@
             
             /* GARSON ICIN EKSI (-) TUSUNU GIZLE */
             .adet-btn.eksi { display: none !important; }
-            
-            /* KASİYER MODU - mobil kısıtlamalar kalkar */
             body.kasiyer-aktif .odeme-kutusu { display: block !important; }
-            body.kasiyer-aktif .sekme-menusu { display: flex !important; flex-wrap: wrap; gap: 8px; }
+            body.kasiyer-aktif .sekme-menusu { display: none !important; }
             body.kasiyer-aktif .adet-btn.eksi { display: flex !important; }
-            body.kasiyer-aktif .btn-masa-tasi { display: inline-block !important; }
+            body.kasiyer-aktif #nav-stok { display: flex !important; }
             
             .mobil-alt-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 2px solid #EDE0D4; z-index: 500; padding: 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); }
             .mobil-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; background: none; border: none; font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700; color: var(--yazi-acik); cursor: pointer; position: relative;}
@@ -673,6 +671,9 @@
         <button class="mobil-nav-btn" id="nav-hazir" onclick="hazirModaliAc()">
             <span class="nav-ikon">🔔</span>Hazir<span class="mobil-nav-badge" id="mobil-hazir-badge" style="display:none;">0</span>
         </button>
+        <button class="mobil-nav-btn" id="nav-stok" onclick="stokModaliAc()" style="display:none; color: var(--kirmizi);">
+            <span class="nav-ikon">📦</span>Stok
+        </button>
     </div>
 
     <div class="toast-container" id="toast-container"></div>
@@ -864,8 +865,9 @@
                     firebase.auth().signInWithEmailAndPassword("kasiyer@atacafe.com", pinGirilen + "00")
                     .then((userCredential) => {
                         kasiyerMod = true;
-                        mobilMod = false; // Kasiyer tam yetkili
+                        mobilMod = false;
                         document.body.classList.add('kasiyer-aktif');
+                        document.getElementById('nav-stok').style.display = 'flex';
                         document.getElementById('pin-ekrani').classList.add('gizli');
                         toastGoster("✅ Kasiyer Girişi Başarılı!");
                     })
@@ -1486,9 +1488,6 @@
             aktifMasaId = id;
             document.getElementById('masa-'+id)?.classList.add('secili');
             document.getElementById('secili-masa-baslik').innerText = "Masa " + id;
-            // Kasiyer rozetini göster
-            let rozetEl = document.getElementById('kasiyer-rozet');
-            if(kasiyerMod && rozetEl) rozetEl.style.display = 'inline-block';
             if(!mobilMod) document.getElementById('btn-masa-tasi').style.display = 'inline-block';
             document.getElementById('masa-secilmedi-mesaji').style.display = "none";
             document.getElementById('siparis-alani').style.display = "block";
