@@ -63,6 +63,8 @@
 
         .masalar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; max-height: 68vh; overflow-y: auto; padding-right: 4px; }
         
+        .masa-bolge-baslik { grid-column: 1 / -1; font-size: 11px; font-weight: 900; color: #A08070; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 2px 2px; }
+        .masa-bolge-ayirici { grid-column: 1 / -1; height: 2px; background: linear-gradient(90deg, transparent, #D4B896, transparent); margin: 8px 0 4px; border-radius: 2px; }
         .masa-kutu { background: var(--yesil); color: white; padding: 13px 5px; text-align: center; border-radius: var(--radius-kucuk); cursor: pointer; font-size: 13px; font-weight: 800; transition: all 0.2s ease; position: relative; user-select: none; }
         .masa-kutu.sari { background: #FFD54F; color: var(--kahve); box-shadow: 0 2px 8px rgba(255,213,79,0.4); }
         .masa-kutu.turuncu { background: var(--turuncu); color: white; box-shadow: 0 2px 8px rgba(230,126,34,0.4); }
@@ -372,9 +374,12 @@
                 </div>
 
                 <div id="siparis-alani" style="display: none;">
-                    <div class="arama-kutu">
-                        <span class="arama-ikon">🔍</span>
-                        <input type="text" id="urun-arama-input" onkeyup="urunAra()" placeholder="Urun ara... (Cay, Kahve)">
+                    <div class="arama-kutu" style="display:flex; gap:8px; align-items:center;">
+                        <div style="position:relative; flex:1;">
+                            <span class="arama-ikon">🔍</span>
+                            <input type="text" id="urun-arama-input" onkeyup="urunAra()" placeholder="Urun ara... (Cay, Kahve)">
+                        </div>
+                        <button id="ses-btn" onclick="sesliArama()" title="Sesli Ara" style="width:42px; height:42px; border-radius:50%; border:2px solid #EDE0D4; background:var(--krem); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;">🎤</button>
                     </div>
                     <div class="urun-listesi-container" id="urunler-alani"></div>
 
@@ -398,6 +403,7 @@
                             <button class="btn-nakit" onclick="hesabiKapat('nakit')">💵 Nakit</button>
                             <button class="btn-kredi" onclick="hesabiKapat('kredi')">💳 K. Karti</button>
                             <button class="btn-parcali" onclick="parcaliOdemeModaliAc()">🧮 Parcali Odeme (Alman Usulu)</button>
+                            <button class="btn-parcali" style="background: linear-gradient(135deg, #E67E22 0%, #CA6F1E 100%);" onclick="seciliOdemeModaliAc()">✅ Secili Urun Ode (Kismi)</button>
                         </div>
                     </div>
                 </div>
@@ -473,6 +479,35 @@
                 <button class="modal-iptal" onclick="modalKapat('parcali-odeme-modali')">✕ Iptal</button>
                 <button class="modal-onayla mor-renk" onclick="parcaliOdemeOnayla()">✓ Hesabi Kapat</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- SEÇİLİ ÜRÜN ÖDEME MODALI -->
+    <div class="modal-overlay" id="secili-odeme-modali">
+        <div class="modal-kart" style="max-width: 420px; max-height: 85vh; overflow-y: auto;">
+            <span class="modal-ikon">✅</span>
+            <div class="modal-baslik">Secili Urun Ode</div>
+            <div class="modal-alt-baslik">Gidecek kisinin urunlerini secin, adet ayarlayin.</div>
+            
+            <div id="secili-urun-listesi" style="margin: 16px 0; text-align: left;"></div>
+            
+            <div style="background: #FFF8EC; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700; color:#7A5C4F;">
+                    <span>Secili Toplam:</span>
+                    <span id="secili-toplam-gosterge" style="color: #E67E22; font-size:18px;">0 ₺</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#A08070; margin-top:6px;">
+                    <span>Masada Kalan:</span>
+                    <span id="secili-kalan-gosterge">0 ₺</span>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                <button class="btn-nakit" style="font-size:13px;" onclick="seciliOdemeOnayla('nakit')">💵 Nakit Ode</button>
+                <button class="btn-kredi" style="font-size:13px;" onclick="seciliOdemeOnayla('kredi')">💳 Kart Ode</button>
+            </div>
+            <button class="modal-iptal" style="width:100%;" onclick="modalKapat('secili-odeme-modali')">✕ Iptal</button>
         </div>
     </div>
 
@@ -1286,7 +1321,12 @@
 
         function masalariDOMaEkle(salonSayisi=20, bahceSayisi=50) {
             const alan = document.getElementById('masalar-alani'); alan.innerHTML = "";
+            // Salon
+            alan.innerHTML += `<div class="masa-bolge-baslik">🏠 Salon</div>`;
             for (let i = 1; i <= salonSayisi; i++) alan.innerHTML += `<div class="masa-kutu" id="masa-S${i}" onclick="masaSec('S${i}')">S${i}</div>`;
+            // Ayırıcı + Bahçe
+            alan.innerHTML += `<div class="masa-bolge-ayirici"></div>`;
+            alan.innerHTML += `<div class="masa-bolge-baslik">🌿 Bahçe</div>`;
             for (let i = 1; i <= bahceSayisi; i++) alan.innerHTML += `<div class="masa-kutu" id="masa-B${i}" onclick="masaSec('B${i}')">B${i}</div>`;
         }
 
@@ -1311,6 +1351,59 @@
             document.querySelectorAll('.masa-kutu').forEach(k => {
                 if(aranan === "" || k.innerText.toLowerCase().includes(aranan)) k.classList.remove('gizli'); else k.classList.add('gizli');
             });
+        }
+
+
+        // ============================================
+        // SESLİ ARAMA
+        // ============================================
+        let sesliDinleme = null;
+
+        function sesliArama() {
+            if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                toastGoster('Bu tarayici sesli aramayı desteklemiyor!', true); return;
+            }
+
+            let btn = document.getElementById('ses-btn');
+
+            // Zaten dinliyorsa durdur
+            if(sesliDinleme) {
+                sesliDinleme.stop();
+                return;
+            }
+
+            let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            sesliDinleme = new SR();
+            sesliDinleme.lang = 'tr-TR';
+            sesliDinleme.interimResults = false;
+            sesliDinleme.maxAlternatives = 1;
+
+            btn.style.background = '#E74C3C';
+            btn.style.color = 'white';
+            btn.innerText = '⏹️';
+            btn.title = 'Dinleniyor... (durdurmak için tıkla)';
+
+            sesliDinleme.onresult = function(event) {
+                let metin = event.results[0][0].transcript;
+                let input = document.getElementById('urun-arama-input');
+                input.value = metin;
+                urunAra();
+                toastGoster('🎤 "' + metin + '" arandı');
+            };
+
+            sesliDinleme.onerror = function(event) {
+                if(event.error !== 'aborted') toastGoster('Ses tanıma hatası: ' + event.error, true);
+            };
+
+            sesliDinleme.onend = function() {
+                sesliDinleme = null;
+                btn.style.background = 'var(--krem)';
+                btn.style.color = '';
+                btn.innerText = '🎤';
+                btn.title = 'Sesli Ara';
+            };
+
+            sesliDinleme.start();
         }
 
         function urunAra() {
@@ -1428,6 +1521,124 @@
             document.getElementById('masa-secilmedi-mesaji').style.display = "block";
             let kap = aktifMasaId; aktifMasaId = null; modalKapat('odeme-modali');
             toastGoster('✓ Masa '+kap+' kapatildi!');
+        }
+
+
+        // ============================================
+        // SEÇİLİ ÜRÜN ÖDEME SİSTEMİ
+        // ============================================
+        let seciliUrunler = {}; // { urunAd: secilenAdet }
+
+        function seciliOdemeModaliAc() {
+            if(mobilMod) { toastGoster('❌ Yetki Reddedildi!', true); return; }
+            if(!aktifMasaId || !masalarData[aktifMasaId].toplam) { toastGoster('Siparis yok!', true); return; }
+            
+            seciliUrunler = {};
+            let m = masalarData[aktifMasaId];
+            let liste = document.getElementById('secili-urun-listesi');
+            liste.innerHTML = '';
+
+            m.siparisler.forEach(item => {
+                if(item.adet <= 0) return;
+                seciliUrunler[item.urun] = 0; // Başlangıçta 0 seçili
+                let birimFiyat = item.birimFiyat || Math.round(item.toplamTutar / item.adet);
+                
+                liste.innerHTML += `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #F4ECE1;" id="secili-satir-${item.urun.replace(/[^a-zA-Z0-9]/g,'_')}">
+                    <div style="flex:1;">
+                        <div style="font-weight:800; color:#3D2314; font-size:14px;">${item.urun}</div>
+                        <div style="font-size:12px; color:#A08070;">Toplam: ${item.adet} adet · ${birimFiyat}₺/adet</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-left:10px;">
+                        <button onclick="seciliAdetDegistir('${item.urun}', -1, ${item.adet}, ${birimFiyat})" 
+                            style="width:32px; height:32px; border-radius:50%; border:2px solid #E0C9B0; background:white; font-size:18px; cursor:pointer; font-weight:900; color:#6B3A2A; display:flex; align-items:center; justify-content:center;">−</button>
+                        <span id="secili-adet-${item.urun.replace(/[^a-zA-Z0-9]/g,'_')}" 
+                            style="font-size:18px; font-weight:900; color:#E67E22; min-width:24px; text-align:center;">0</span>
+                        <button onclick="seciliAdetDegistir('${item.urun}', 1, ${item.adet}, ${birimFiyat})" 
+                            style="width:32px; height:32px; border-radius:50%; border:2px solid #E0C9B0; background:white; font-size:18px; cursor:pointer; font-weight:900; color:#6B3A2A; display:flex; align-items:center; justify-content:center;">+</button>
+                    </div>
+                </div>`;
+            });
+
+            seciliToplamGuncelle();
+            document.getElementById('secili-odeme-modali').classList.add('goster');
+        }
+
+        function seciliAdetDegistir(urunAd, delta, maxAdet, birimFiyat) {
+            let mevcut = seciliUrunler[urunAd] || 0;
+            let yeni = Math.max(0, Math.min(maxAdet, mevcut + delta));
+            seciliUrunler[urunAd] = yeni;
+            let id = urunAd.replace(/[^a-zA-Z0-9]/g,'_');
+            document.getElementById('secili-adet-' + id).innerText = yeni;
+            seciliToplamGuncelle();
+        }
+
+        function seciliToplamGuncelle() {
+            let m = masalarData[aktifMasaId];
+            let toplam = 0;
+            m.siparisler.forEach(item => {
+                let birimFiyat = item.birimFiyat || Math.round(item.toplamTutar / item.adet);
+                toplam += (seciliUrunler[item.urun] || 0) * birimFiyat;
+            });
+            let kalan = (m.toplam || 0) - toplam;
+            document.getElementById('secili-toplam-gosterge').innerText = toplam + ' ₺';
+            document.getElementById('secili-kalan-gosterge').innerText = kalan + ' ₺';
+        }
+
+        function seciliOdemeOnayla(tip) {
+            let m = masalarData[aktifMasaId];
+            let odenecekToplam = 0;
+            let herhangiSecildi = false;
+
+            m.siparisler.forEach(item => {
+                let birimFiyat = item.birimFiyat || Math.round(item.toplamTutar / item.adet);
+                let secilen = seciliUrunler[item.urun] || 0;
+                if(secilen > 0) {
+                    herhangiSecildi = true;
+                    odenecekToplam += secilen * birimFiyat;
+                    // Satılan ürünlere ekle
+                    satilanUrunler[item.urun] = (satilanUrunler[item.urun] || 0) + secilen;
+                    // Masadan düş
+                    item.adet -= secilen;
+                    item.toplamTutar = item.adet * birimFiyat;
+                }
+            });
+
+            if(!herhangiSecildi) { toastGoster('Hicbir urun secilmedi!', true); return; }
+
+            // Sıfır adete düşen ürünleri sil
+            m.siparisler = m.siparisler.filter(item => item.adet > 0);
+            m.toplam = m.siparisler.reduce((t, s) => t + s.toplamTutar, 0);
+
+            // Ciro güncelle
+            if(tip === 'nakit') ciroNakit += odenecekToplam;
+            else ciroKredi += odenecekToplam;
+            siparisAdedi++;
+
+            // Masa tamamen boşaldıysa kapat
+            let masaAktif = m.siparisler.length > 0;
+
+            db.ref().update({
+                'ciroNakit': ciroNakit,
+                'ciroKredi': ciroKredi,
+                'satilanUrunler': satilanUrunler,
+                'siparisAdedi': siparisAdedi,
+                ['masalar/' + aktifMasaId]: masaAktif 
+                    ? { ...m, aktif: true, durum: 'sari' }
+                    : { aktif: false, siparisler: [], toplam: 0, durum: '', acilisZamani: null }
+            });
+
+            modalKapat('secili-odeme-modali');
+            
+            if(!masaAktif) {
+                document.getElementById('masa-' + aktifMasaId).className = 'masa-kutu';
+                document.getElementById('siparis-alani').style.display = 'none';
+                document.getElementById('masa-secilmedi-mesaji').style.display = 'block';
+                aktifMasaId = null;
+                toastGoster('✓ Odeme alindi, masa kapatildi!');
+            } else {
+                toastGoster('✓ ' + odenecekToplam + '₺ odeme alindi. Masada ' + m.toplam + '₺ kaldi.');
+            }
         }
 
         // ============================================
