@@ -273,7 +273,8 @@
             .panel { border-radius: 0; box-shadow: none; border-bottom: 1px solid #EDE0D4; }
             .sol-panel { width: 100%; } .orta-panel { width: 100%; }
             .masalar-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: none; overflow-y: visible; }
-            .mobil-sayfa { display: none !important; } .mobil-sayfa.aktif-sayfa { display: block !important; }
+            .mobil-sayfa { position: absolute; top: 0; left: 0; width: 100%; visibility: hidden; opacity: 0; pointer-events: none; }
+            .mobil-sayfa.aktif-sayfa { position: relative; visibility: visible; opacity: 1; pointer-events: auto; }
             .odeme-kutusu { display: none !important; } 
             .btn-masa-tasi { display: none !important; } 
             
