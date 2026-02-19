@@ -418,6 +418,33 @@
         </div>
     </div>
 
+
+    <!-- MOBİL ARŞİV SAYFASI -->
+    <div class="panel mobil-sayfa" id="sayfa-arsiv" style="padding: 16px; overflow-y: auto; padding-bottom: 80px;">
+        <div class="panel-baslik" style="margin: -16px -16px 16px; border-radius: 0;">🗂️ Arsiv & Kapatma</div>
+        
+        <!-- Bugünün Cirosu -->
+        <div class="ciro-kutu" style="margin-bottom: 14px;">
+            <div class="ciro-satir"><span>💵 Nakit</span><span class="tutar"><span id="arsiv-ciro-nakit">0</span> ₺</span></div>
+            <div class="ciro-satir"><span>💳 Kredi Karti</span><span class="tutar"><span id="arsiv-ciro-kredi">0</span> ₺</span></div>
+            <div class="ciro-cizgi"></div>
+            <div class="ciro-satir ciro-toplam"><span>🏆 Toplam</span><span><span id="arsiv-ciro-toplam">0</span> ₺</span></div>
+        </div>
+
+        <button class="aksiyon-btn" onclick="gunuKapat()" style="margin-bottom: 10px;">🌙 Gunu Kapat & Arsive Ekle</button>
+        <button class="aksiyon-btn btn-mavi" onclick="ayiKapat()" style="margin-bottom: 10px;">📆 Ayi Kapat</button>
+        <button class="aksiyon-btn btn-mor" onclick="yiliKapat()" style="margin-bottom: 14px;">🗓️ Yili Kapat</button>
+
+        <div class="arsiv-baslik">📅 Gunluk Arsiv</div>
+        <div class="arsiv-alani" style="max-height: 200px;"><div id="arsiv-listesi-mobil"></div></div>
+        
+        <div class="arsiv-baslik" style="margin-top: 10px;">🌿 Aylik Arsiv</div>
+        <div class="arsiv-alani" style="max-height: 150px; background: #EAFAF1; border-color: #A9DFBF;"><div id="aylik-arsiv-listesi-mobil"></div></div>
+        
+        <div class="arsiv-baslik" style="margin-top: 10px;">🔮 Yillik Arsiv</div>
+        <div class="arsiv-alani" style="max-height: 150px; background: #F5EEF8; border-color: #D2B4DE;"><div id="yillik-arsiv-listesi-mobil"></div></div>
+    </div>
+
     <div class="modal-overlay" id="iptal-modali">
         <div class="modal-kart">
             <span class="modal-ikon">⚠️</span>
@@ -674,6 +701,9 @@
         <button class="mobil-nav-btn" id="nav-stok" onclick="stokModaliAc()" style="display:none; color: var(--kirmizi);">
             <span class="nav-ikon">📦</span>Stok
         </button>
+        <button class="mobil-nav-btn" id="nav-arsiv" onclick="mobilSayfaDegistir('arsiv')" style="display:none; color: #7D3C98;">
+            <span class="nav-ikon">🗂️</span>Arsiv
+        </button>
     </div>
 
     <div class="toast-container" id="toast-container"></div>
@@ -868,6 +898,7 @@
                         mobilMod = false;
                         document.body.classList.add('kasiyer-aktif');
                         document.getElementById('nav-stok').style.display = 'flex';
+                        document.getElementById('nav-arsiv').style.display = 'flex';
                         document.getElementById('pin-ekrani').classList.add('gizli');
                         toastGoster("✅ Kasiyer Girişi Başarılı!");
                     })
@@ -1347,8 +1378,10 @@
         function mobilSayfaDegistir(sayfa) {
             document.querySelectorAll('.mobil-sayfa').forEach(e => e.classList.remove('aktif-sayfa'));
             document.querySelectorAll('.mobil-nav-btn').forEach(e => e.classList.remove('aktif'));
-            if(sayfa === 'masalar' || sayfa === 'siparis') document.getElementById('sayfa-'+sayfa).classList.add('aktif-sayfa');
-            document.getElementById('nav-'+sayfa).classList.add('aktif');
+            let sayfaEl = document.getElementById('sayfa-'+sayfa);
+            if(sayfaEl) sayfaEl.classList.add('aktif-sayfa');
+            let navEl = document.getElementById('nav-'+sayfa);
+            if(navEl) navEl.classList.add('aktif');
         }
 
         function masalariDOMaEkle(salonSayisi=20, bahceSayisi=50) {
@@ -1854,6 +1887,13 @@
         }
 
         function arsivleriYukleUI() {
+            // Mobil arsiv ciro güncelle
+            let mn = document.getElementById('arsiv-ciro-nakit');
+            let mk = document.getElementById('arsiv-ciro-kredi');
+            let mt = document.getElementById('arsiv-ciro-toplam');
+            if(mn) mn.innerText = ciroNakit;
+            if(mk) mk.innerText = ciroKredi;
+            if(mt) mt.innerText = ciroNakit + ciroKredi;
             const f = (liste, alanId, tur) => {
                 let div = document.getElementById(alanId); div.innerHTML = liste.length===0 ? "<div style='text-align:center;color:#A08070;padding:12px;'>Kayit yok.</div>" : "";
                 liste.forEach((k,i) => {
