@@ -700,7 +700,7 @@
         let gunlukZayiler = {}; 
         let arsivGunluk = [], arsivAylik = [], arsivYillik = [];
         let firebaseHazir = false; 
-        let mobilMod = window.innerWidth <= 768;
+        let mobilMod = false; // Giriş tipine göre set edilir
         let kasiyerMod = false; // Kasiyer girişinde true olur - mobil ama tam yetkili
         
         let ilkYukleme = true;
@@ -797,13 +797,14 @@
         let pinModu = '';
 
         function pinBaslat() {
-            // Ekran genişliğine göre Garson mu Kasa mı olduğunu anla
             if (window.innerWidth <= 768) {
                 pinModu = 'garson';
+                mobilMod = true; // Garson = mobil mod
                 document.getElementById('pin-baslik').innerText = 'Garson PIN (4 hane)';
                 pinDisplayGuncelle(4);
             } else {
                 pinModu = 'kasa';
+                mobilMod = false; // Kasa = masaüstü mod
                 document.getElementById('pin-baslik').innerText = 'Kasa PIN (6 hane)';
                 pinDisplayGuncelle(6);
             }
@@ -846,6 +847,8 @@
             firebase.auth().signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
                 kasiyerMod = false;
+                if(pinModu === 'garson') mobilMod = true;
+                else mobilMod = false;
                 document.getElementById('pin-ekrani').classList.add('gizli');
                 toastGoster("✅ Giriş Başarılı!");
             })
@@ -944,9 +947,7 @@
             hazirSiparisleriDinle();
 
             window.addEventListener('resize', () => {
-                // kasiyerMod aktifse mobilMod'u değiştirme
-                if(!kasiyerMod) mobilMod = window.innerWidth <= 768;
-                else mobilMod = false;
+                // mobilMod giriş sırasında belirlendi, burada değiştirilmez
                 // Pin modunu guncelle (Eger hala giris yapilmadiysa)
                 if(!document.getElementById('pin-ekrani').classList.contains('gizli')) {
                     pinBaslat();
