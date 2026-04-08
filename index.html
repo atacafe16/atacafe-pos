@@ -643,6 +643,38 @@
     </div>
 
 
+    <!-- CİRO & RAPORLAR PIN MODALI -->
+    <div class="modal-overlay" id="ciro-pin-modali">
+        <div class="modal-kart" style="max-width: 340px; padding: 32px 28px 24px;">
+            <div style="font-size: 36px; margin-bottom: 8px;">📊</div>
+            <div class="modal-baslik">Ciro & Raporlar</div>
+            <div class="modal-alt-baslik">Bu alana erişmek için yönetici PIN kodunu girin.</div>
+
+            <div class="pin-display" id="ciro-pin-display" style="justify-content: center; margin-bottom: 20px;"></div>
+
+            <div class="pin-grid" style="max-width: 260px; margin: 0 auto;">
+                <button class="pin-btn" onclick="ciroPinGir('1')">1</button>
+                <button class="pin-btn" onclick="ciroPinGir('2')">2</button>
+                <button class="pin-btn" onclick="ciroPinGir('3')">3</button>
+                <button class="pin-btn" onclick="ciroPinGir('4')">4</button>
+                <button class="pin-btn" onclick="ciroPinGir('5')">5</button>
+                <button class="pin-btn" onclick="ciroPinGir('6')">6</button>
+                <button class="pin-btn" onclick="ciroPinGir('7')">7</button>
+                <button class="pin-btn" onclick="ciroPinGir('8')">8</button>
+                <button class="pin-btn" onclick="ciroPinGir('9')">9</button>
+                <button class="pin-btn bos"></button>
+                <button class="pin-btn" onclick="ciroPinGir('0')">0</button>
+                <button class="pin-btn sil" onclick="ciroPinSil()">⌫</button>
+            </div>
+
+            <div class="pin-hata-mesaj" id="ciro-pin-hata">Hatalı PIN! Tekrar deneyin.</div>
+
+            <div class="modal-butonlar" style="margin-top: 20px;">
+                <button class="modal-iptal" onclick="modalKapat('ciro-pin-modali')" style="width: 100%;">✕ Vazgeç</button>
+            </div>
+        </div>
+    </div>
+
     <!-- GÜN SONU ÖZET MODALI -->
     <div class="modal-overlay" id="gun-sonu-modali">
         <div class="modal-kart" style="max-width: 420px; width: 92%;">
@@ -1377,7 +1409,63 @@
             });
         }
 
+        // ============================================
+        // CİRO & RAPORLAR PIN SİSTEMİ
+        // ============================================
+        const CIRO_PIN = '2580'; // 👉 Ciro & Raporlar için PIN kodunu buradan değiştirin
+        let ciroPinGirilen = '';
+
+        function ciroPinDisplayGuncelle() {
+            let d = document.getElementById('ciro-pin-display');
+            d.innerHTML = '';
+            for (let i = 0; i < CIRO_PIN.length; i++) {
+                d.innerHTML += `<div class="pin-nokta ${i < ciroPinGirilen.length ? 'dolu' : ''}"></div>`;
+            }
+        }
+
+        function ciroPinGir(rakam) {
+            if (ciroPinGirilen.length >= CIRO_PIN.length) return;
+            ciroPinGirilen += rakam;
+            ciroPinDisplayGuncelle();
+            if (ciroPinGirilen.length === CIRO_PIN.length) setTimeout(ciroPinKontrol, 200);
+        }
+
+        function ciroPinSil() {
+            if (ciroPinGirilen.length === 0) return;
+            ciroPinGirilen = ciroPinGirilen.slice(0, -1);
+            ciroPinDisplayGuncelle();
+        }
+
+        function ciroPinKontrol() {
+            if (ciroPinGirilen === CIRO_PIN) {
+                modalKapat('ciro-pin-modali');
+                ciroPinGirilen = '';
+                ciroPinDisplayGuncelle();
+                document.getElementById('sekme-kasa').style.display = 'none';
+                document.getElementById('sekme-ciro').style.display = 'flex';
+                document.getElementById('btn-kasa').classList.remove('aktif');
+                document.getElementById('btn-ciro').classList.add('aktif');
+                toastGoster('✅ Ciro & Raporlar açıldı!');
+            } else {
+                document.querySelectorAll('#ciro-pin-display .pin-nokta').forEach(n => n.classList.add('hata'));
+                document.getElementById('ciro-pin-hata').classList.add('goster');
+                setTimeout(() => {
+                    ciroPinGirilen = '';
+                    ciroPinDisplayGuncelle();
+                    document.querySelectorAll('#ciro-pin-display .pin-nokta').forEach(n => n.classList.remove('hata'));
+                    document.getElementById('ciro-pin-hata').classList.remove('goster');
+                }, 800);
+            }
+        }
+
         function sekmeDegistir(sekme) {
+            if (sekme === 'ciro') {
+                // Ciro sekmesi için PIN sor
+                ciroPinGirilen = '';
+                ciroPinDisplayGuncelle();
+                document.getElementById('ciro-pin-modali').classList.add('goster');
+                return;
+            }
             document.getElementById('sekme-kasa').style.display = sekme==='kasa' ? 'flex':'none';
             document.getElementById('sekme-ciro').style.display = sekme==='ciro' ? 'flex':'none';
             document.getElementById('btn-kasa').classList.toggle('aktif', sekme==='kasa');
@@ -2080,3 +2168,4 @@
     </script>
 </body>
 </html>
+
