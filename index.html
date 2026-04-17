@@ -252,6 +252,171 @@
         .btn-teslim-et { background: var(--yesil); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
         .btn-teslim-et:hover { background: #3D8B60; transform: scale(1.05); }
 
+        /* ===================== MASA GECMISI ===================== */
+        .gecmis-filtre-alani { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .gecmis-filtre-alani input,
+        .gecmis-filtre-alani select {
+            flex: 1; min-width: 100px; padding: 9px 12px;
+            border: 2px solid #EDE0D4; border-radius: 50px;
+            font-size: 13px; font-family: 'Nunito', sans-serif;
+            font-weight: 600; color: #3D2314; background: #FDF6EC;
+            outline: none;
+        }
+        .gecmis-filtre-alani input:focus,
+        .gecmis-filtre-alani select:focus { border-color: #F4A832; background: white; }
+        .gecmis-kart {
+            background: white; border: 1.5px solid #EDE0D4; border-radius: 14px;
+            margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.2s;
+        }
+        .gecmis-kart:hover { box-shadow: 0 4px 16px rgba(107,58,42,0.1); }
+        .gecmis-kart-baslik {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; cursor: pointer; background: #FFFDF9;
+            border-bottom: 1px dashed #EDE0D4;
+        }
+        .gecmis-kart-baslik:hover { background: #FDF6EC; }
+        .gecmis-masa-tag {
+            background: #6B3A2A; color: white;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 13px; font-weight: 900; margin-right: 10px;
+        }
+        .gecmis-sure-tag {
+            background: #D6EAF8; color: #2E86AB;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: 800;
+        }
+        .gecmis-toplam-tag { font-size: 17px; font-weight: 900; color: #6B3A2A; }
+        .gecmis-odeme-nakit {
+            background: #D4EDDA; color: #4A9B6F;
+            padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;
+        }
+        .gecmis-odeme-kredi {
+            background: #FDEBBF; color: #B07A00;
+            padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;
+        }
+        .gecmis-odeme-parcali {
+            background: #E8DAEF; color: #7D3C98;
+            padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;
+        }
+        .gecmis-detay {
+            padding: 0 16px; max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .gecmis-detay.acik { max-height: 600px; padding: 12px 16px; }
+        .gecmis-detay-satir {
+            display: flex; justify-content: space-between;
+            font-size: 13px; padding: 5px 0;
+            border-bottom: 1px dashed #F4ECE4; color: #3D2314; font-weight: 600;
+        }
+        .gecmis-detay-satir:last-child { border-bottom: none; }
+        .gecmis-zaman-satir {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            font-size: 12px; color: #7A5C4F; font-weight: 700;
+            padding: 8px 0 10px; border-bottom: 1px solid #EDE0D4; margin-bottom: 8px;
+        }
+        .gecmis-zaman-chip {
+            background: #FDF6EC; border: 1px solid #EDE0D4;
+            padding: 3px 10px; border-radius: 20px; font-size: 12px;
+        }
+        .gecmis-bos {
+            text-align: center; padding: 40px 20px;
+            color: #A08070; font-weight: 700; font-size: 14px;
+        }
+
+        /* ===================== MASA GECMISI TAM EKRAN OVERLAY ===================== */
+        #gecmis-overlay {
+            position: fixed; inset: 0; z-index: 3000;
+            background: #FDF6EC;
+            display: flex; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            will-change: transform;
+        }
+        #gecmis-overlay.acik { transform: translateX(0); }
+        .gecmis-ov-header {
+            background: linear-gradient(135deg, #6B3A2A 0%, #8B5A42 100%);
+            color: white; padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .gecmis-ov-baslik {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .gecmis-ov-kapat {
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+            color: white; width: 38px; height: 38px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .gecmis-ov-kapat:hover { background: rgba(255,255,255,0.35); }
+        .gecmis-filtre-serit {
+            display: flex; gap: 8px; padding: 12px 16px;
+            background: white; border-bottom: 1px solid #EDE0D4;
+            flex-shrink: 0; flex-wrap: wrap;
+        }
+        .gecmis-filtre-serit input,
+        .gecmis-filtre-serit select {
+            flex: 1; min-width: 100px; padding: 8px 14px;
+            border: 2px solid #EDE0D4; border-radius: 50px;
+            font-size: 13px; font-family: 'Nunito', sans-serif;
+            font-weight: 600; color: #3D2314; background: #FDF6EC; outline: none;
+        }
+        .gecmis-filtre-serit input:focus,
+        .gecmis-filtre-serit select:focus { border-color: #F4A832; background: white; }
+        .gecmis-ov-liste { flex: 1; overflow-y: auto; padding: 14px 16px; }
+        .gk {
+            background: white; border: 1.5px solid #EDE0D4;
+            border-radius: 14px; margin-bottom: 10px; overflow: hidden;
+        }
+        .gk-baslik {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; cursor: pointer; user-select: none;
+            transition: background 0.15s;
+        }
+        .gk-baslik:hover { background: #FDF6EC; }
+        .gk-sol { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .gk-masa {
+            background: #6B3A2A; color: white;
+            padding: 4px 13px; border-radius: 20px;
+            font-size: 13px; font-weight: 900;
+        }
+        .gk-sure {
+            background: #D6EAF8; color: #2E86AB;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: 800;
+        }
+        .gk-tarih { font-size: 11px; color: #A08070; font-weight: 600; }
+        .gk-detay {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease;
+            border-top: 0 solid #EDE0D4;
+        }
+        .gk-detay.acik { max-height: 500px; border-top: 1px dashed #EDE0D4; }
+        .gk-detay-ic { padding: 12px 16px; }
+        .gk-zaman-satir {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 10px; padding-bottom: 10px;
+            border-bottom: 1px solid #EDE0D4;
+        }
+        .gk-zaman-chip {
+            background: #FDF6EC; border: 1px solid #EDE0D4;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; color: #7A5C4F;
+        }
+        .gk-urun-satir {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; border-bottom: 1px dashed #F4ECE4;
+            font-size: 13px; font-weight: 600; color: #3D2314;
+        }
+        .gk-urun-satir:last-child { border-bottom: none; }
+        .gk-adet {
+            background: #FDEBBF; color: #B07A00;
+            font-size: 11px; padding: 1px 7px; border-radius: 10px;
+            margin-left: 5px; font-weight: 800;
+        }
+        .gk-urun-ad { font-weight: 700; }
         /* ===================== TOAST BILDIRIM ===================== */
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
         .toast { background: white; border-radius: 12px; padding: 12px 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; animation: toastIn 0.3s ease, toastOut 0.3s ease 4s forwards; max-width: 320px; border-left: 4px solid var(--yesil); }
@@ -344,6 +509,9 @@
     <div class="sekme-menusu">
         <button id="btn-kasa" class="sekme-btn aktif" onclick="sekmeDegistir('kasa')">🧾 Kasa & Siparis</button>
         <button id="btn-ciro" class="sekme-btn" onclick="sekmeDegistir('ciro')">📊 Ciro & Raporlar</button>
+        <button class="sekme-btn" onclick="gecmisOverlayAc()" style="border-color: #7D3C98; color: #7D3C98;">
+            📋 Masa Gecmisi
+        </button>
         <button class="sekme-btn btn-bildirim" onclick="hazirModaliAc()">
             🔔 Hazir Siparisler 
             <span class="badge" id="masaustu-hazir-badge" style="display:none;">0</span>
@@ -642,6 +810,32 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="gecmis-modali">
+        <div class="modal-kart" style="max-width: 500px; width: 94%; max-height: 88vh; overflow: hidden; display: flex; flex-direction: column; padding: 24px 20px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <div class="modal-baslik" style="margin:0;">📋 Masa Gecmisi</div>
+                <button onclick="modalKapat('gecmis-modali')"
+                    style="background:#F0E6E0; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; font-weight:900; color:#7A5C4F;">✕</button>
+            </div>
+            <div class="modal-alt-baslik" style="margin-bottom: 14px;">Masalarin acilis, kapanis ve siparis gecmisi</div>
+            <div id="gecmis-ozet" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;"></div>
+            <div class="gecmis-filtre-alani">
+                <input type="text" id="gecmis-masa-filtre" placeholder="Masa ara (S5, B12...)" oninput="gecmisFiltrele()">
+                <input type="date" id="gecmis-tarih-filtre" oninput="gecmisFiltrele()">
+                <select id="gecmis-odeme-filtre" onchange="gecmisFiltrele()">
+                    <option value="">Tum Odemeler</option>
+                    <option value="nakit">💵 Nakit</option>
+                    <option value="kredi">💳 Kredi Karti</option>
+                    <option value="parcali">🧮 Parcali</option>
+                    <option value="secili">✅ Kismi</option>
+                </select>
+            </div>
+            <div id="gecmis-liste" style="overflow-y: auto; flex: 1; padding-right: 4px;">
+                <div class="gecmis-bos">Yukleniyor...</div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- CİRO & RAPORLAR PIN MODALI -->
     <div class="modal-overlay" id="ciro-pin-modali">
@@ -736,12 +930,29 @@
         <button class="mobil-nav-btn" id="nav-stok" onclick="stokModaliAc()" style="display:none; color: var(--kirmizi);">
             <span class="nav-ikon">📦</span>Stok
         </button>
+        <button class="mobil-nav-btn" id="nav-gecmis" onclick="gecmisOverlayAc()">
+            <span class="nav-ikon">📋</span>Gecmis
+        </button>
         <button class="mobil-nav-btn" id="nav-arsiv" onclick="mobilSayfaDegistir('arsiv')" style="display:none; color: #7D3C98;">
             <span class="nav-ikon">🗂️</span>Arsiv
         </button>
     </div>
 
     <div class="toast-container" id="toast-container"></div>
+
+    <div id="gecmis-overlay">
+        <div class="gecmis-ov-header">
+            <div class="gecmis-ov-baslik">📋 Masa Gecmisi</div>
+            <button class="gecmis-ov-kapat" onclick="gecmisOverlayKapat()">✕</button>
+        </div>
+        <div class="gecmis-filtre-serit">
+            <input type="text" id="gov-masa-filtre" placeholder="🔍 Masa (S5, B12...)" oninput="govFiltrele()">
+            <input type="date" id="gov-tarih-filtre" oninput="govFiltrele()">
+        </div>
+        <div class="gecmis-ov-liste" id="gov-liste">
+            <div class="gecmis-bos">⏳ Yukleniyor...</div>
+        </div>
+    </div>
 
     <script>
         // ============================================
@@ -780,6 +991,8 @@
         let islenmisHazirSiparisler = new Set();
         let uygulamaAcilisZamani = Date.now();
         let hazirMasalar = new Set(); 
+        let tumGecmis = [];
+        let govTumData = [];
         
         let bekleyenIptalUrun = ""; 
 
@@ -1379,7 +1592,8 @@
             guncellemeler['ciroNakit'] = ciroNakit; guncellemeler['ciroKredi'] = ciroKredi;
             guncellemeler['satilanUrunler'] = satilanUrunler;
             guncellemeler['siparisAdedi'] = siparisAdedi;
-            guncellemeler['masalar/' + aktifMasaId] = { aktif: false, siparisler: [], toplam: 0, durum: '' };
+            masaGecmisiKaydet(aktifMasaId, masa.siparisler, toplam, nakit, kredi, 'parcali');
+            guncellemeler['masalar/' + aktifMasaId] = { aktif: false, siparisler: [], toplam: 0, durum: '', acilisZamani: null };
             db.ref().update(guncellemeler);
             document.getElementById('masa-' + aktifMasaId).className = 'masa-kutu';
             document.getElementById('siparis-alani').style.display = "none";
@@ -1725,6 +1939,14 @@
             // Oturma süresini hesapla
             let acilis = masalarData[aktifMasaId]?.acilisZamani;
             let oturmaDakika = acilis ? Math.round((Date.now() - acilis) / 60000) : 0;
+            masaGecmisiKaydet(
+                aktifMasaId,
+                m.siparisler,
+                m.toplam,
+                bekleyenOdemeTipi === 'nakit' ? m.toplam : 0,
+                bekleyenOdemeTipi === 'kredi' ? m.toplam : 0,
+                bekleyenOdemeTipi
+            );
 
             db.ref().update({'ciroNakit':ciroNakit, 'ciroKredi':ciroKredi, 'satilanUrunler':satilanUrunler, 'siparisAdedi':siparisAdedi,
                 ['masalar/'+aktifMasaId]:{aktif:false, siparisler:[], toplam:0, durum:'', acilisZamani:null},
@@ -1801,6 +2023,7 @@
 
         function seciliOdemeOnayla(tip) {
             let m = masalarData[aktifMasaId];
+            let odemeOncesiSiparisler = JSON.parse(JSON.stringify(m.siparisler || []));
             let odenecekToplam = 0;
             let herhangiSecildi = false;
 
@@ -1831,6 +2054,16 @@
 
             // Masa tamamen boşaldıysa kapat
             let masaAktif = m.siparisler.length > 0;
+            if(!masaAktif) {
+                masaGecmisiKaydet(
+                    aktifMasaId,
+                    odemeOncesiSiparisler,
+                    odenecekToplam,
+                    tip === 'nakit' ? odenecekToplam : 0,
+                    tip === 'kredi' ? odenecekToplam : 0,
+                    'secili'
+                );
+            }
 
             db.ref().update({
                 'ciroNakit': ciroNakit,
@@ -2146,6 +2379,263 @@
                 alert("Hata: " + err.message);
             });
         }
+
+        // ============================================
+        // MASA GECMISI SISTEMI
+        // ============================================
+        function masaGecmisiKaydet(masaNo, siparisler, toplam, nakitMiktar, krediMiktar, odeme) {
+            if (!masaNo || !toplam) return;
+            let acilis = masalarData[masaNo]?.acilisZamani || null;
+            let kapanis = Date.now();
+            let sure = acilis ? Math.round((kapanis - acilis) / 60000) : null;
+            let kayit = {
+                masaNo: masaNo,
+                acilisZamani: acilis,
+                kapanisZamani: kapanis,
+                sure: sure,
+                siparisler: JSON.parse(JSON.stringify(siparisler || [])),
+                toplam: toplam,
+                nakitMiktar: nakitMiktar || 0,
+                krediMiktar: krediMiktar || 0,
+                odeme: odeme
+            };
+            db.ref('masaGecmisi').push(kayit);
+        }
+
+        function gecmisModaliAc() {
+            let bugun = new Date();
+            let d = bugun.toISOString().split('T')[0];
+            document.getElementById('gecmis-tarih-filtre').value = d;
+            document.getElementById('gecmis-masa-filtre').value = '';
+            document.getElementById('gecmis-odeme-filtre').value = '';
+            document.getElementById('gecmis-modali').classList.add('goster');
+            document.getElementById('gecmis-liste').innerHTML = '<div class="gecmis-bos">⏳ Yukleniyor...</div>';
+
+            db.ref('masaGecmisi').orderByChild('kapanisZamani').limitToLast(500).once('value').then(snap => {
+                let val = snap.val();
+                if (!val) {
+                    tumGecmis = [];
+                    gecmisFiltrele();
+                    return;
+                }
+                tumGecmis = Object.entries(val)
+                    .map(([id, k]) => ({ ...k, _id: id }))
+                    .sort((a, b) => (b.kapanisZamani || 0) - (a.kapanisZamani || 0));
+                gecmisFiltrele();
+            }).catch(() => {
+                document.getElementById('gecmis-liste').innerHTML = '<div class="gecmis-bos">❌ Veri cekilemedi.</div>';
+            });
+        }
+
+        function gecmisFiltrele() {
+            let masaQ = (document.getElementById('gecmis-masa-filtre')?.value || '').toLowerCase().trim();
+            let tarihQ = document.getElementById('gecmis-tarih-filtre')?.value || '';
+            let odemeQ = document.getElementById('gecmis-odeme-filtre')?.value || '';
+
+            let filtreli = tumGecmis.filter(k => {
+                let masaNo = (k.masaNo || '').toString().toLowerCase();
+                if (masaQ && !masaNo.includes(masaQ)) return false;
+                if (odemeQ && k.odeme !== odemeQ) return false;
+                if (tarihQ) {
+                    let kTarih = gecmisTarihFromTimestamp(k.kapanisZamani);
+                    if (kTarih !== tarihQ) return false;
+                }
+                return true;
+            });
+
+            gecmisOzetGuncelle(filtreli);
+            gecmisListeRender(filtreli);
+        }
+
+        function gecmisTarihFromTimestamp(ts) {
+            if (!ts) return '';
+            let d = new Date(ts);
+            return d.getFullYear() + '-'
+                + String(d.getMonth() + 1).padStart(2, '0') + '-'
+                + String(d.getDate()).padStart(2, '0');
+        }
+
+        function gecmisOzetGuncelle(liste) {
+            let topToplam = liste.reduce((a, k) => a + (k.toplam || 0), 0);
+            let topNakit = liste.reduce((a, k) => a + (k.nakitMiktar || 0), 0);
+            let topKredi = liste.reduce((a, k) => a + (k.krediMiktar || 0), 0);
+            document.getElementById('gecmis-ozet').innerHTML = `
+                <div style="background:#FDF6EC; border-radius:10px; padding:10px; text-align:center; border:1.5px solid #EDE0D4;">
+                    <div style="font-size:11px; font-weight:800; color:#7A5C4F; margin-bottom:4px;">TOPLAM</div>
+                    <div style="font-size:18px; font-weight:900; color:#6B3A2A;">${topToplam.toLocaleString('tr-TR')} ₺</div>
+                </div>
+                <div style="background:#D4EDDA; border-radius:10px; padding:10px; text-align:center; border:1.5px solid #A9DFBF;">
+                    <div style="font-size:11px; font-weight:800; color:#4A9B6F; margin-bottom:4px;">NAKIT</div>
+                    <div style="font-size:18px; font-weight:900; color:#3D8B60;">${topNakit.toLocaleString('tr-TR')} ₺</div>
+                </div>
+                <div style="background:#FDEBBF; border-radius:10px; padding:10px; text-align:center; border:1.5px solid #F4A832;">
+                    <div style="font-size:11px; font-weight:800; color:#B07A00; margin-bottom:4px;">KREDI</div>
+                    <div style="font-size:18px; font-weight:900; color:#E09020;">${topKredi.toLocaleString('tr-TR')} ₺</div>
+                </div>`;
+        }
+
+        function gecmisListeRender(liste) {
+            let div = document.getElementById('gecmis-liste');
+            if (liste.length === 0) {
+                div.innerHTML = '<div class="gecmis-bos">📭 Bu kriterlere uyan kayit yok.</div>';
+                return;
+            }
+
+            div.innerHTML = liste.map((k, idx) => {
+                let kapanisStr = gecmisFormatZaman(k.kapanisZamani);
+                let acilisStr = k.acilisZamani ? gecmisFormatZaman(k.acilisZamani) : '—';
+                let sureStr = k.sure != null
+                    ? (k.sure < 60 ? (k.sure + ' dk') : (Math.floor(k.sure / 60) + ' sa ' + (k.sure % 60) + ' dk'))
+                    : '—';
+
+                let odemeTag = '';
+                if (k.odeme === 'nakit') odemeTag = '<span class="gecmis-odeme-nakit">💵 Nakit</span>';
+                else if (k.odeme === 'kredi') odemeTag = '<span class="gecmis-odeme-kredi">💳 Kart</span>';
+                else if (k.odeme === 'parcali') odemeTag = '<span class="gecmis-odeme-parcali">🧮 Parcali</span>';
+                else odemeTag = '<span class="gecmis-odeme-parcali">✅ Kismi</span>';
+
+                let siparislerHTML = (k.siparisler || []).map(s => `
+                    <div class="gecmis-detay-satir">
+                        <span>${s.urun || '-'} <span style="background:#FDEBBF; color:#B07A00; font-size:11px; padding:1px 7px; border-radius:10px;">x${s.adet || 0}</span></span>
+                        <span style="font-weight:800; color:#6B3A2A;">${s.toplamTutar || 0} ₺</span>
+                    </div>
+                `).join('');
+
+                let detayFinans = '';
+                if (k.odeme === 'parcali') {
+                    detayFinans = `
+                        <div style="display:flex; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid #EDE0D4;">
+                            <span style="font-size:12px; color:#4A9B6F; font-weight:800; background:#D4EDDA; padding:3px 10px; border-radius:8px;">💵 ${k.nakitMiktar || 0} ₺ Nakit</span>
+                            <span style="font-size:12px; color:#B07A00; font-weight:800; background:#FDEBBF; padding:3px 10px; border-radius:8px;">💳 ${k.krediMiktar || 0} ₺ Kart</span>
+                        </div>`;
+                }
+
+                return `<div class="gecmis-kart">
+                    <div class="gecmis-kart-baslik" onclick="gecmisDetayToggle('gd-${idx}')">
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                            <span class="gecmis-masa-tag">Masa ${k.masaNo || '-'}</span>
+                            ${odemeTag}
+                            <span class="gecmis-sure-tag">⏱ ${sureStr}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                            <span class="gecmis-toplam-tag">${k.toplam || 0} ₺</span>
+                            <span style="font-size:11px; color:#A08070; font-weight:600;">${kapanisStr}</span>
+                        </div>
+                    </div>
+                    <div class="gecmis-detay" id="gd-${idx}">
+                        <div class="gecmis-zaman-satir">
+                            <span class="gecmis-zaman-chip">🟢 Acilis: ${acilisStr}</span>
+                            <span class="gecmis-zaman-chip">🔴 Kapanis: ${kapanisStr}</span>
+                            <span class="gecmis-zaman-chip">⏱ Sure: ${sureStr}</span>
+                        </div>
+                        ${siparislerHTML || '<div class="gecmis-detay-satir"><span>Siparis kaydi yok</span><span>—</span></div>'}
+                        ${detayFinans}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function gecmisDetayToggle(id) {
+            let el = document.getElementById(id);
+            if (el) el.classList.toggle('acik');
+        }
+
+        function gecmisFormatZaman(ts) {
+            if (!ts) return '—';
+            let d = new Date(ts);
+            return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function gecmisOverlayAc() {
+            let bugun = new Date().toISOString().split('T')[0];
+            document.getElementById('gov-tarih-filtre').value = bugun;
+            document.getElementById('gov-masa-filtre').value = '';
+            document.getElementById('gecmis-overlay').classList.add('acik');
+            document.getElementById('gov-liste').innerHTML = '<div class="gecmis-bos">⏳ Yukleniyor...</div>';
+
+            db.ref('masaGecmisi').orderByChild('kapanisZamani').limitToLast(500)
+                .once('value').then(snap => {
+                    let val = snap.val();
+                    if (!val) { govTumData = []; govFiltrele(); return; }
+                    govTumData = Object.entries(val)
+                        .map(([id, k]) => ({ ...k, _id: id }))
+                        .sort((a, b) => (b.kapanisZamani || 0) - (a.kapanisZamani || 0));
+                    govFiltrele();
+                })
+                .catch(() => {
+                    document.getElementById('gov-liste').innerHTML = '<div class="gecmis-bos">❌ Veri cekilemedi.</div>';
+                });
+        }
+
+        function gecmisOverlayKapat() {
+            document.getElementById('gecmis-overlay').classList.remove('acik');
+        }
+
+        function govFiltrele() {
+            let masaQ = (document.getElementById('gov-masa-filtre')?.value || '').toLowerCase().trim();
+            let tarihQ = document.getElementById('gov-tarih-filtre')?.value || '';
+
+            let filtreli = govTumData.filter(k => {
+                let masaNo = (k.masaNo || '').toString().toLowerCase();
+                if (masaQ && !masaNo.includes(masaQ)) return false;
+                if (tarihQ && gecmisTarihFromTimestamp(k.kapanisZamani) !== tarihQ) return false;
+                return true;
+            });
+
+            govRender(filtreli);
+        }
+
+        function govRender(liste) {
+            let div = document.getElementById('gov-liste');
+            if (liste.length === 0) {
+                div.innerHTML = '<div class="gecmis-bos">📭 Bu kriterlere uyan kayit yok.</div>';
+                return;
+            }
+
+            div.innerHTML = liste.map((k, i) => {
+                let acilisStr = k.acilisZamani ? gecmisFormatZaman(k.acilisZamani) : '—';
+                let kapanisStr = gecmisFormatZaman(k.kapanisZamani);
+                let sureStr = k.sure != null
+                    ? (k.sure < 60 ? (k.sure + ' dk') : (Math.floor(k.sure / 60) + ' sa ' + (k.sure % 60) + ' dk'))
+                    : '—';
+
+                let urunlerHTML = (k.siparisler || []).map(s => `
+                    <div class="gk-urun-satir">
+                        <span class="gk-urun-ad">${s.urun || '-'}<span class="gk-adet">x${s.adet || 0}</span></span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="gk">
+                        <div class="gk-baslik" onclick="govToggle('gi-${i}')">
+                            <div class="gk-sol">
+                                <span class="gk-masa">Masa ${k.masaNo || '-'}</span>
+                                <span class="gk-sure">⏱ ${sureStr}</span>
+                            </div>
+                            <div class="gk-tarih">${kapanisStr}</div>
+                        </div>
+                        <div class="gk-detay" id="gi-${i}">
+                            <div class="gk-detay-ic">
+                                <div class="gk-zaman-satir">
+                                    <span class="gk-zaman-chip">🟢 Acilis: ${acilisStr}</span>
+                                    <span class="gk-zaman-chip">🔴 Kapanis: ${kapanisStr}</span>
+                                    <span class="gk-zaman-chip">⏱ Sure: ${sureStr}</span>
+                                </div>
+                                ${urunlerHTML || '<div class="gk-urun-satir"><span>Siparis kaydi yok</span></div>'}
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function govToggle(id) {
+            let el = document.getElementById(id);
+            if (el) el.classList.toggle('acik');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') gecmisOverlayKapat();
+        });
 
         // ============================================
         // YARDIMCI VE INDIRME FONKSIYONLARI
