@@ -2063,6 +2063,7 @@
 
         function seciliOdemeOnayla(tip) {
             let m = masalarData[aktifMasaId];
+            let odemeOncesiDurum = m.durum; // Mevcut durumu hatirla
             let odenenSiparisler = []; // Sadece bu seferlik ödenen ürünler
             let odenecekToplam = 0;
             let herhangiSecildi = false;
@@ -2083,6 +2084,10 @@
                     // Masadan düş
                     item.adet -= secilen;
                     item.toplamTutar = item.adet * birimFiyat;
+                    // teslimEdilen de dusurulmeli ki tutarli kalsin (teslimEdilen > adet olamaz)
+                    if (item.teslimEdilen != null) {
+                        item.teslimEdilen = Math.min(item.teslimEdilen, item.adet);
+                    }
                 }
             });
 
@@ -2106,9 +2111,24 @@
                 masaAktif ? 'kismi-' + tip : 'secili'
             );
 
+            // Kismi odeme sonrasi durum mantigi:
+            // Kalan urunlerin HEPSI teslim edilmis mi? Evet → kirmizi kalmaya devam
+            // Hayir (yeni siparis de var) → odeme oncesi durum neyse onu koru (sari/turuncu/kirmizi)
+            let yeniDurum = odemeOncesiDurum || 'sari';
+            if (masaAktif) {
+                let hepsiTeslim = m.siparisler.every(s => (s.teslimEdilen || 0) >= s.adet);
+                if (hepsiTeslim) {
+                    yeniDurum = 'kirmizi'; // Hepsi teslim, odeme bekliyor
+                } else {
+                    // Ödeme oncesi durum kirmiziysa ama simdi yeni urunler varsa turuncu'ya dus
+                    // Aksi halde ödeme oncesi durumu koru
+                    yeniDurum = odemeOncesiDurum || 'sari';
+                }
+            }
+
             db.ref().update({
                 ['masalar/' + aktifMasaId]: masaAktif 
-                    ? { ...m, aktif: true, durum: 'sari' }
+                    ? { ...m, aktif: true, durum: yeniDurum }
                     : { aktif: false, siparisler: [], toplam: 0, durum: '', acilisZamani: null }
             });
 
