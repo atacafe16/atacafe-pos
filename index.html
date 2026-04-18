@@ -580,7 +580,6 @@
                         <div class="odeme-butonlari">
                             <button class="btn-nakit" onclick="hesabiKapat('nakit')">💵 Nakit</button>
                             <button class="btn-kredi" onclick="hesabiKapat('kredi')">💳 K. Karti</button>
-                            <button class="btn-parcali" onclick="parcaliOdemeModaliAc()">🧮 Parcali Odeme (Alman Usulu)</button>
                             <button class="btn-parcali" style="background: linear-gradient(135deg, #E67E22 0%, #CA6F1E 100%);" onclick="seciliOdemeModaliAc()">✅ Secili Urun Ode (Kismi)</button>
                         </div>
                     </div>
@@ -602,7 +601,10 @@
             <div class="ciro-satir ciro-toplam"><span>🏆 Toplam</span><span><span id="arsiv-ciro-toplam">0</span> ₺</span></div>
         </div>
 
-        <button class="aksiyon-btn" onclick="gunuKapat()" style="margin-bottom: 10px;">🌙 Gunu Kapat & Arsive Ekle</button>
+        <div style="background:#FDF6EC; border:1.5px dashed #D4B896; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:12px; color:#7A5C4F; text-align:center; font-weight:700;">
+            🌙 Gun kapatma <strong>otomatik</strong>tir. Her gun ilk uygulama acildiginda dunun cirosu arsive eklenir.
+        </div>
+        <button class="aksiyon-btn" onclick="sonOdemeyiIptalEt()" style="margin-bottom: 10px; background: linear-gradient(135deg, #D9381E 0%, #A93226 100%);">🗑️ Son Odemeyi Iptal Et (Test)</button>
         <button class="aksiyon-btn btn-mavi" onclick="ayiKapat()" style="margin-bottom: 10px;">📆 Ayi Kapat</button>
         <button class="aksiyon-btn btn-mor" onclick="yiliKapat()" style="margin-bottom: 14px;">🗓️ Yili Kapat</button>
 
@@ -757,7 +759,12 @@
                     </div>
                 </div>
 
-                <button class="aksiyon-btn" onclick="gunuKapat()" style="margin-top: 10px;">🌙 Gunu Kapat & Arsive Ekle</button>
+                <div style="background:#FDF6EC; border:1.5px dashed #D4B896; border-radius:10px; padding:12px; margin-top:10px; font-size:13px; color:#7A5C4F; text-align:center; font-weight:700; line-height:1.5;">
+                    🌙 Gun kapatma <span style="color:var(--yesil);">otomatik</span>tir. Her gun ilk uygulama acildiginda, son kapatilmadan bu yana gecen gunler sirayla arsive eklenir.<br>
+                    <span style="font-size:11px; color:#A08070; font-weight:600;">Cihaz acik kalmasina gerek yok.</span>
+                </div>
+
+                <button class="aksiyon-btn" onclick="sonOdemeyiIptalEt()" style="margin-top: 10px; background: linear-gradient(135deg, #D9381E 0%, #A93226 100%);">🗑️ Son Odemeyi Iptal Et (Test)</button>
             </div>
         </div>
 
@@ -1233,6 +1240,7 @@
             veritabaniniDinle();
             baglantiDurumunuIzle();
             hazirSiparisleriDinle();
+            otomatikGunKapatmaKur(); // Her gece 04:00'te otomatik gun kapatma
 
             window.addEventListener('resize', () => {
                 // mobilMod giriş sırasında belirlendi, burada değiştirilmez
@@ -1298,11 +1306,8 @@
                 if (!data || !data.masalar) { ilkKurulumuYap(); return; }
 
                 masalarData = data.masalar;
-                ciroNakit = data.ciroNakit || 0;
-                ciroKredi = data.ciroKredi || 0;
-                satilanUrunler = data.satilanUrunler || {};
-                siparisAdedi = data.siparisAdedi || 0;
-                
+                // ciroNakit/ciroKredi/satilanUrunler/siparisAdedi ARTIK masaGecmisi'nden turetiliyor
+                // Bu sayede manuel sifirlama yok, hicbir kayit kaybolmaz
                 gunlukIkramlar = data.gunlukIkramlar || {};
                 gunlukZayiler = data.gunlukZayiler || {};
 
@@ -1337,9 +1342,54 @@
                     }
                     mobilBadgeGuncelle();
                 }
-                ciroEkraniGuncelle(); arsivleriYukleUI();
+                // ciroEkraniGuncelle masaGecmisi dinleyicisinden cagrilacak
+                arsivleriYukleUI();
                 }); // db.ref kapanış
+
+                // masaGecmisi'ni canli dinle - bugunun cirosu buradan turetiliyor
+                db.ref('masaGecmisi').on('value', function(snap) {
+                    bugunCiroHesapla(snap.val() || {});
+                });
             }); // onAuthStateChanged kapanış
+        }
+
+        // ============================================
+        // BUGUNUN CIROSUNU MASA GECMISINDEN TURET
+        // (Gun sinir kurali: sabah 06:00'dan once kapanan masalar dune sayilir)
+        // ============================================
+        function isTarihiGetir(ts) {
+            // Bir timestamp hangi "is gunune" ait: saat <06:00 ise bir onceki gun
+            let d = new Date(ts);
+            if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime();
+        }
+
+        function bugunCiroHesapla(gecmisData) {
+            let bugunIsGunu = isTarihiGetir(Date.now());
+
+            let nakit = 0, kredi = 0, urunler = {}, sayi = 0;
+            let masalarSet = new Set();
+
+            Object.values(gecmisData).forEach(k => {
+                if (!k.kapanisZamani) return;
+                if (isTarihiGetir(k.kapanisZamani) !== bugunIsGunu) return;
+
+                nakit += k.nakitMiktar || 0;
+                kredi += k.krediMiktar || 0;
+                masalarSet.add(k._id || (k.masaNo + '_' + k.kapanisZamani)); // tekil kayit sayisi
+                (k.siparisler || []).forEach(s => {
+                    urunler[s.urun] = (urunler[s.urun] || 0) + (s.adet || 0);
+                });
+            });
+            sayi = masalarSet.size;
+
+            ciroNakit = nakit;
+            ciroKredi = kredi;
+            satilanUrunler = urunler;
+            siparisAdedi = sayi;
+
+            ciroEkraniGuncelle();
         }
 
         function masalariRenklendir() {
@@ -1582,17 +1632,9 @@
             let nakit = parseInt(document.getElementById('parcali-nakit-input').value) || 0;
             let kredi = toplam - nakit;
             if(nakit > toplam || nakit < 0) { toastGoster('Hatali tutar girdiniz!', true); return; }
-            ciroNakit += nakit; ciroKredi += kredi;
-            siparisAdedi++;
-            masa.siparisler.forEach((item) => {
-                if(satilanUrunler[item.urun]) satilanUrunler[item.urun] += item.adet;
-                else satilanUrunler[item.urun] = item.adet;
-            });
-            let guncellemeler = {};
-            guncellemeler['ciroNakit'] = ciroNakit; guncellemeler['ciroKredi'] = ciroKredi;
-            guncellemeler['satilanUrunler'] = satilanUrunler;
-            guncellemeler['siparisAdedi'] = siparisAdedi;
+            // Ciro masaGecmisi dinleyicisinden turetilir; manuel guncelleme yok
             masaGecmisiKaydet(aktifMasaId, masa.siparisler, toplam, nakit, kredi, 'parcali');
+            let guncellemeler = {};
             guncellemeler['masalar/' + aktifMasaId] = { aktif: false, siparisler: [], toplam: 0, durum: '', acilisZamani: null };
             db.ref().update(guncellemeler);
             document.getElementById('masa-' + aktifMasaId).className = 'masa-kutu';
@@ -1933,9 +1975,7 @@
 
         function odemeOnayla() {
             let m = masalarData[aktifMasaId];
-            if(bekleyenOdemeTipi==='nakit') ciroNakit += m.toplam; else ciroKredi += m.toplam;
-            siparisAdedi++;
-            m.siparisler.forEach(i => satilanUrunler[i.urun] = (satilanUrunler[i.urun]||0) + i.adet);
+            // Ciro masaGecmisi dinleyicisinden turetilir; burada manuel guncelleme yok
             // Oturma süresini hesapla
             let acilis = masalarData[aktifMasaId]?.acilisZamani;
             let oturmaDakika = acilis ? Math.round((Date.now() - acilis) / 60000) : 0;
@@ -1948,7 +1988,7 @@
                 bekleyenOdemeTipi
             );
 
-            db.ref().update({'ciroNakit':ciroNakit, 'ciroKredi':ciroKredi, 'satilanUrunler':satilanUrunler, 'siparisAdedi':siparisAdedi,
+            db.ref().update({
                 ['masalar/'+aktifMasaId]:{aktif:false, siparisler:[], toplam:0, durum:'', acilisZamani:null},
                 ...(oturmaDakika > 0 && oturmaDakika < 480 ? {['istatistikler/oturmaSureleri/' + Date.now()]: oturmaDakika} : {})
             });
@@ -2023,7 +2063,7 @@
 
         function seciliOdemeOnayla(tip) {
             let m = masalarData[aktifMasaId];
-            let odemeOncesiSiparisler = JSON.parse(JSON.stringify(m.siparisler || []));
+            let odenenSiparisler = []; // Sadece bu seferlik ödenen ürünler
             let odenecekToplam = 0;
             let herhangiSecildi = false;
 
@@ -2033,8 +2073,13 @@
                 if(secilen > 0) {
                     herhangiSecildi = true;
                     odenecekToplam += secilen * birimFiyat;
-                    // Satılan ürünlere ekle
-                    satilanUrunler[item.urun] = (satilanUrunler[item.urun] || 0) + secilen;
+                    // Ödenen ürünleri geçmiş için kaydet
+                    odenenSiparisler.push({
+                        urun: item.urun,
+                        adet: secilen,
+                        birimFiyat: birimFiyat,
+                        toplamTutar: secilen * birimFiyat
+                    });
                     // Masadan düş
                     item.adet -= secilen;
                     item.toplamTutar = item.adet * birimFiyat;
@@ -2047,29 +2092,21 @@
             m.siparisler = m.siparisler.filter(item => item.adet > 0);
             m.toplam = m.siparisler.reduce((t, s) => t + s.toplamTutar, 0);
 
-            // Ciro güncelle
-            if(tip === 'nakit') ciroNakit += odenecekToplam;
-            else ciroKredi += odenecekToplam;
-            siparisAdedi++;
-
-            // Masa tamamen boşaldıysa kapat
+            // Masa tamamen boşaldı mı?
             let masaAktif = m.siparisler.length > 0;
-            if(!masaAktif) {
-                masaGecmisiKaydet(
-                    aktifMasaId,
-                    odemeOncesiSiparisler,
-                    odenecekToplam,
-                    tip === 'nakit' ? odenecekToplam : 0,
-                    tip === 'kredi' ? odenecekToplam : 0,
-                    'secili'
-                );
-            }
+
+            // HER kısmi ödeme icin gecmise kayit dus (masa kapansa da kapanmasa da)
+            // Ciro masaGecmisi'nden turetilir, manuel guncelleme yok
+            masaGecmisiKaydet(
+                aktifMasaId,
+                odenenSiparisler,
+                odenecekToplam,
+                tip === 'nakit' ? odenecekToplam : 0,
+                tip === 'kredi' ? odenecekToplam : 0,
+                masaAktif ? 'kismi-' + tip : 'secili'
+            );
 
             db.ref().update({
-                'ciroNakit': ciroNakit,
-                'ciroKredi': ciroKredi,
-                'satilanUrunler': satilanUrunler,
-                'siparisAdedi': siparisAdedi,
                 ['masalar/' + aktifMasaId]: masaAktif 
                     ? { ...m, aktif: true, durum: 'sari' }
                     : { aktif: false, siparisler: [], toplam: 0, durum: '', acilisZamani: null }
@@ -2109,22 +2146,134 @@
             else { Object.entries(gunlukZayiler).sort((a,b)=>b[1]-a[1]).forEach(([ad,adt]) => rapZayi.innerHTML += `<li>${ad}: <strong>${adt} adet</strong></li>`); }
         }
 
-        function gunuKapat() {
-            if(ciroNakit+ciroKredi===0 && Object.keys(satilanUrunler).length===0) return alert("Kapatilacak ciro yok!");
-            if(!confirm("Gunu kapatmak istediginize emin misiniz? Tum masalar sifirlanacak.")) return;
-            
-            let d = new Date(); if(d.getHours()<6) d.setDate(d.getDate()-1);
+        // ============================================
+        // TEMBEL ARSIVLEME (LAZY ARCHIVE)
+        // ============================================
+        // Zamanlayici yok, cihaz bagimsiz. Uygulama her acildiginda ve her
+        // saat bir 'sonKapananGun' bayragindan sonra gecmis tum gunleri
+        // masaGecmisi'ndeki gercek verilere bakarak arsivler.
+        // Ornek: sonKapananGun=2026-04-15, bugun 2026-04-18 ise
+        // 15, 16, 17 gunleri sirayla arsivlenir.
+        // ============================================
+        function otomatikGunKapatmaKur() {
+            // Sayfa acilisinda hemen kontrol et (Firebase hazir olsun diye 3 sn bekle)
+            setTimeout(tembelArsivle, 3000);
+            // Bir de her saat bir kontrol et (uygulama gun boyu acik kalirsa)
+            setInterval(tembelArsivle, 60 * 60 * 1000);
+        }
 
-            // Hava durumunu çek, sonra arşive ekle
-            fetch('https://api.openweathermap.org/data/2.5/weather?q=Nilufer,Bursa,TR&appid=cbbea52f3660042f198127111a006437&units=metric&lang=tr')
-                .then(r => r.json())
-                .then(hava => {
-                    let havaDurum = hava?.weather?.[0]?.description || '';
-                    let sicaklik = hava?.main?.temp ? Math.round(hava.main.temp) : null;
-                    let havaEmoji = sicakliktenEmoji(hava?.weather?.[0]?.id);
-                    gunuKapatDevam(d, havaDurum, sicaklik, havaEmoji);
-                })
-                .catch(() => gunuKapatDevam(d, '', null, '')); // API hata verse de gün kapansın
+        // Bir tarihi "YYYY-MM-DD" formatina cevir
+        function tarihAnahtari(d) {
+            return d.getFullYear() + '-' +
+                String(d.getMonth()+1).padStart(2,'0') + '-' +
+                String(d.getDate()).padStart(2,'0');
+        }
+
+        // String tarih anahtarini Date objesine cevir
+        function anahtardanTarih(s) {
+            let [y, m, g] = s.split('-').map(x => parseInt(x, 10));
+            return new Date(y, m-1, g);
+        }
+
+        // Bugunun "is gunu" tarihini bul (saat <06:00 ise dun)
+        function bugununIsGunuAnahtari() {
+            let d = new Date();
+            if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+            return tarihAnahtari(d);
+        }
+
+        // ASIL TEMBEL ARSIVLEYICI
+        function tembelArsivle() {
+            if (!firebaseHazir) return;
+            db.ref('sonKapananGun').once('value').then(snap => {
+                let sonKapanan = snap.val(); // "YYYY-MM-DD" veya null
+                let bugunKey = bugununIsGunuAnahtari();
+
+                if (!sonKapanan) {
+                    // Ilk kez calisiyor. Duplike onlemek icin mevcut arsivdeki EN SON tarihi bul
+                    // ve onu sonKapananGun olarak set et. Sonra devam et.
+                    let mevcutArsivTarihleri = arsivGunluk
+                        .map(k => {
+                            // "17.4.2026" → Date
+                            let [g, a, y] = (k.tarih || '').split('.').map(x => parseInt(x, 10));
+                            if (!g || !a || !y) return null;
+                            let d = new Date(y, a-1, g);
+                            return tarihAnahtari(d);
+                        })
+                        .filter(x => x)
+                        .sort();
+
+                    let baslangicKey;
+                    if (mevcutArsivTarihleri.length > 0) {
+                        // Mevcut arsivdeki en son tarihten sonra basla (duplike yok)
+                        baslangicKey = mevcutArsivTarihleri[mevcutArsivTarihleri.length - 1];
+                        console.log('[Tembel Arsivleme] Ilk calisma. Mevcut arsivde en son: ' + baslangicKey + '. Bundan sonraki gunler arsivlenecek.');
+                    } else {
+                        // Hic arsiv yok - masaGecmisi'nden en eski kayda bak
+                        db.ref('masaGecmisi').orderByChild('kapanisZamani').limitToFirst(1).once('value').then(s => {
+                            let v = s.val();
+                            if (!v) {
+                                db.ref('sonKapananGun').set(bugunKey);
+                                return;
+                            }
+                            let ilkKayit = Object.values(v)[0];
+                            let baslangic = new Date(ilkKayit.kapanisZamani);
+                            if (baslangic.getHours() < 6) baslangic.setDate(baslangic.getDate() - 1);
+                            baslangic.setHours(0,0,0,0);
+                            // Baslangic = en eski kayit gunu; flag'i bir onceki gune set et ki o gunden itibaren arsivlensin
+                            let flagTarih = new Date(baslangic);
+                            flagTarih.setDate(flagTarih.getDate() - 1);
+                            db.ref('sonKapananGun').set(tarihAnahtari(flagTarih)).then(() => {
+                                sirayaArsivle(tarihAnahtari(flagTarih), bugunKey);
+                            });
+                        });
+                        return;
+                    }
+
+                    // Flag'i set et ve devam et
+                    db.ref('sonKapananGun').set(baslangicKey).then(() => {
+                        sirayaArsivle(baslangicKey, bugunKey);
+                    });
+                    return;
+                }
+
+                // sonKapanan'dan sonraki gunden, bugunden bir onceki gune kadar kapat
+                sirayaArsivle(sonKapanan, bugunKey);
+            });
+        }
+
+        // sonKapanan'dan sonraki ilk gunden basla, bugunKey'e kadar (haric) sirayla arsivle
+        async function sirayaArsivle(sonKapanan, bugunKey) {
+            let d = anahtardanTarih(sonKapanan);
+            d.setDate(d.getDate() + 1); // sonKapanan'dan bir sonraki gun
+            let simdiKey = tarihAnahtari(d);
+            let islenenVar = false;
+
+            while (simdiKey < bugunKey) {
+                islenenVar = true;
+                await birGunuArsivle(new Date(d), simdiKey);
+                d.setDate(d.getDate() + 1);
+                simdiKey = tarihAnahtari(d);
+            }
+
+            if (islenenVar) {
+                console.log('[Tembel Arsivleme] ' + sonKapanan + ' sonrasi gunler arsivlendi.');
+            }
+        }
+
+        // Tek bir gunu arsivle (Promise dondurur)
+        function birGunuArsivle(d, gunKey) {
+            return new Promise((resolve) => {
+                fetch('https://api.openweathermap.org/data/2.5/weather?q=Nilufer,Bursa,TR&appid=cbbea52f3660042f198127111a006437&units=metric&lang=tr')
+                    .then(r => r.json())
+                    .then(hava => {
+                        let havaDurum = hava?.weather?.[0]?.description || '';
+                        let sicaklik = hava?.main?.temp ? Math.round(hava.main.temp) : null;
+                        let havaEmoji = sicakliktenEmoji(hava?.weather?.[0]?.id);
+                        gunuKapatDevam(d, gunKey, havaDurum, sicaklik, havaEmoji, resolve);
+                    })
+                    .catch(() => gunuKapatDevam(d, gunKey, '', null, '', resolve));
+            });
         }
 
         function sicakliktenEmoji(weatherId) {
@@ -2140,49 +2289,115 @@
             return '🌡️';
         }
 
-        function gunuKapatDevam(d, havaDurum, sicaklik, havaEmoji) {
-            arsivGunluk.unshift({
-                tarih: `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`, 
-                nakit: ciroNakit, 
-                kredi: ciroKredi, 
-                toplam: ciroNakit+ciroKredi,
-                siparisAdedi: siparisAdedi,
-                urunler: JSON.parse(JSON.stringify(satilanUrunler)),
-                ikramlar: JSON.parse(JSON.stringify(gunlukIkramlar)),
-                zayiler: JSON.parse(JSON.stringify(gunlukZayiler)),
-                hava: havaDurum,
-                sicaklik: sicaklik,
-                havaEmoji: havaEmoji
-            });
-            
-            // Özet bilgilerini hesapla
-            let ozToplam = ciroNakit + ciroKredi;
-            let ozNakit = ciroNakit;
-            let ozKredi = ciroKredi;
-            let ozMasa = siparisAdedi;
-            let ozUrun = Object.values(satilanUrunler).reduce((a,b)=>a+b,0);
-            let ozEnCok = Object.entries(satilanUrunler).sort((a,b)=>b[1]-a[1])[0] || null;
-            let ozOrt = ozMasa > 0 ? Math.round(ozToplam / ozMasa) : 0;
-            let ozTarih = `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+        function gunuKapatDevam(d, gunKey, havaDurum, sicaklik, havaEmoji, resolve) {
+            // DUPLIKE KORUMA: Bu tarih zaten arsivde var mi?
+            let buTarihStr = `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+            let duplikaMi = arsivGunluk.some(k => k.tarih === buTarihStr);
+            if (duplikaMi) {
+                console.log('[Arsiv] ' + gunKey + ' zaten arsivde, atlandi.');
+                db.ref('sonKapananGun').set(gunKey).then(() => {
+                    if (resolve) resolve();
+                });
+                return;
+            }
 
-            db.ref().update({
-                'arsivler/gunluk': arsivGunluk, 
-                'ciroNakit': 0, 'ciroKredi': 0, 
-                'satilanUrunler': {}, 
-                'siparisAdedi': 0,
-                'gunlukIkramlar': {}, 'gunlukZayiler': {}
-            });
+            // Bu tarih icin masaGecmisi'nden topla
+            db.ref('masaGecmisi').once('value').then(snap => {
+                let kayitlar = snap.val() || {};
 
-            // Gün sonu özet modalını göster
-            document.getElementById('gun-sonu-tarih').innerText = ozTarih + ' tarihli gün kapatıldı.';
-            document.getElementById('os-toplam').innerText = ozToplam.toLocaleString('tr-TR') + ' ₺';
-            document.getElementById('os-nakit').innerText = ozNakit.toLocaleString('tr-TR') + ' ₺';
-            document.getElementById('os-kredi').innerText = ozKredi.toLocaleString('tr-TR') + ' ₺';
-            document.getElementById('os-masa').innerText = ozMasa + ' masa';
-            document.getElementById('os-urun').innerText = ozUrun + ' adet';
-            document.getElementById('os-encok').innerText = ozEnCok ? ozEnCok[0] + ' (' + ozEnCok[1] + ' adet)' : '—';
-            document.getElementById('os-ort').innerText = ozOrt.toLocaleString('tr-TR') + ' ₺';
-            document.getElementById('gun-sonu-modali').classList.add('goster');
+                // Hedef is gunu baslangici
+                let hedefBaslangic = new Date(d);
+                hedefBaslangic.setHours(0, 0, 0, 0);
+                let hedefTs = hedefBaslangic.getTime();
+
+                let nakit = 0, kredi = 0, urunler = {}, oturumSet = new Set();
+
+                Object.entries(kayitlar).forEach(([id, k]) => {
+                    if (!k.kapanisZamani) return;
+                    if (isTarihiGetir(k.kapanisZamani) !== hedefTs) return;
+                    nakit += k.nakitMiktar || 0;
+                    kredi += k.krediMiktar || 0;
+                    // Oturum sayisi: ayni masa + ayni acilisZamani = tek oturum
+                    let oturumKey = k.acilisZamani ? (k.masaNo + '_' + k.acilisZamani) : id;
+                    oturumSet.add(oturumKey);
+                    (k.siparisler || []).forEach(s => {
+                        urunler[s.urun] = (urunler[s.urun] || 0) + (s.adet || 0);
+                    });
+                });
+
+                let toplam = nakit + kredi;
+                // O gunun flag'ini her durumda set et - bos gun olsa da bir daha denenmesin
+                let guncellemeler = { 'sonKapananGun': gunKey };
+
+                if (toplam > 0 || Object.keys(urunler).length > 0) {
+                    arsivGunluk.unshift({
+                        tarih: buTarihStr,
+                        nakit: nakit,
+                        kredi: kredi,
+                        toplam: toplam,
+                        siparisAdedi: oturumSet.size,
+                        urunler: urunler,
+                        ikramlar: {},
+                        zayiler: {},
+                        hava: havaDurum,
+                        sicaklik: sicaklik,
+                        havaEmoji: havaEmoji
+                    });
+                    guncellemeler['arsivler/gunluk'] = arsivGunluk;
+                    console.log('[Arsiv] ' + gunKey + ' → ' + toplam + '₺ (' + oturumSet.size + ' masa)');
+                } else {
+                    console.log('[Arsiv] ' + gunKey + ' bos gun, sadece flag set edildi.');
+                }
+
+                db.ref().update(guncellemeler).then(() => {
+                    if (resolve) resolve();
+                });
+            }).catch(() => { if (resolve) resolve(); });
+        }
+
+        // Manuel tetikleme icin (eski butondan veya konsoldan)
+        function gunuKapat() {
+            if (!confirm("Tum kapatilmamis eski gunler simdi arsivlensin mi?")) return;
+            tembelArsivle();
+            toastGoster('✓ Arsivleme tetiklendi, birkac saniye surebilir.');
+        }
+
+        // Son kapatilan masa odemesini iptal eder (test amacli)
+        // masaGecmisi'nden son kaydi siler ve ciroyu otomatik guncel tutar
+        function sonOdemeyiIptalEt() {
+            db.ref('masaGecmisi').orderByChild('kapanisZamani').limitToLast(1).once('value').then(snap => {
+                let val = snap.val();
+                if (!val) { alert('Iptal edilecek odeme yok.'); return; }
+                let [id, k] = Object.entries(val)[0];
+
+                let d = new Date(k.kapanisZamani);
+                let zamanStr = d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+                let tipEtiket = k.odeme || '—';
+                if (tipEtiket === 'kismi-nakit') tipEtiket = 'Kismi Nakit';
+                else if (tipEtiket === 'kismi-kredi') tipEtiket = 'Kismi Kart';
+                else if (tipEtiket === 'nakit') tipEtiket = 'Nakit';
+                else if (tipEtiket === 'kredi') tipEtiket = 'Kart';
+                else if (tipEtiket === 'parcali') tipEtiket = 'Parcali';
+                else if (tipEtiket === 'secili') tipEtiket = 'Son Odeme';
+
+                let mesaj = '🗑️ SON ODEME IPTAL EDILECEK\n\n' +
+                    'Masa: ' + (k.masaNo || '—') + '\n' +
+                    'Tutar: ' + (k.toplam || 0) + '₺\n' +
+                    'Tip: ' + tipEtiket + '\n' +
+                    'Zaman: ' + zamanStr + '\n\n' +
+                    'Onayliyorsan bu kayit tamamen silinecek ve ciro guncellenecek.\n\n' +
+                    'Devam edilsin mi?';
+
+                if (!confirm(mesaj)) return;
+
+                db.ref('masaGecmisi/' + id).remove().then(() => {
+                    toastGoster('✓ Son odeme iptal edildi. Ciro guncellendi.');
+                    console.log('[Iptal] ' + id + ' silindi.');
+                });
+            }).catch(err => {
+                alert('Hata: ' + err.message);
+            });
         }
 
         function ayiKapat() {
@@ -2492,6 +2707,8 @@
                 if (k.odeme === 'nakit') odemeTag = '<span class="gecmis-odeme-nakit">💵 Nakit</span>';
                 else if (k.odeme === 'kredi') odemeTag = '<span class="gecmis-odeme-kredi">💳 Kart</span>';
                 else if (k.odeme === 'parcali') odemeTag = '<span class="gecmis-odeme-parcali">🧮 Parcali</span>';
+                else if (k.odeme === 'kismi-nakit') odemeTag = '<span class="gecmis-odeme-nakit">💵 Kismi Nakit</span>';
+                else if (k.odeme === 'kismi-kredi') odemeTag = '<span class="gecmis-odeme-kredi">💳 Kismi Kart</span>';
                 else odemeTag = '<span class="gecmis-odeme-parcali">✅ Kismi</span>';
 
                 let siparislerHTML = (k.siparisler || []).map(s => `
@@ -2575,12 +2792,32 @@
             let masaQ = (document.getElementById('gov-masa-filtre')?.value || '').toLowerCase().trim();
             let tarihQ = document.getElementById('gov-tarih-filtre')?.value || '';
 
+            // Once masa filtresini tek tek kayitlara uygula, sonra grupla
             let filtreli = govTumData.filter(k => {
                 let masaNo = (k.masaNo || '').toString().toLowerCase();
                 if (masaQ && !masaNo.includes(masaQ)) return false;
-                if (tarihQ && gecmisTarihFromTimestamp(k.kapanisZamani) !== tarihQ) return false;
                 return true;
             });
+
+            // Tarih filtresi govRender icinde oturumun SON KAPANIS zamanina gore uygulanacak
+            // Bunun icin once oturumlari toplayalim, sonra tarih filtresini uygulayalim
+            if (tarihQ) {
+                // Masa+acilis grupla, her grubun son kapanisini bul, eslesmeyi filtrele
+                let gecerliAnahtarlar = new Set();
+                let gruplar = {};
+                filtreli.forEach(k => {
+                    let anahtar = k.acilisZamani ? (k.masaNo + '_' + k.acilisZamani) : ('tek_' + (k._id || ''));
+                    if (!gruplar[anahtar]) gruplar[anahtar] = 0;
+                    gruplar[anahtar] = Math.max(gruplar[anahtar], k.kapanisZamani || 0);
+                });
+                Object.entries(gruplar).forEach(([anahtar, sonKapanis]) => {
+                    if (gecmisTarihFromTimestamp(sonKapanis) === tarihQ) gecerliAnahtarlar.add(anahtar);
+                });
+                filtreli = filtreli.filter(k => {
+                    let anahtar = k.acilisZamani ? (k.masaNo + '_' + k.acilisZamani) : ('tek_' + (k._id || ''));
+                    return gecerliAnahtarlar.has(anahtar);
+                });
+            }
 
             govRender(filtreli);
         }
@@ -2592,36 +2829,121 @@
                 return;
             }
 
-            div.innerHTML = liste.map((k, i) => {
-                let acilisStr = k.acilisZamani ? gecmisFormatZaman(k.acilisZamani) : '—';
-                let kapanisStr = gecmisFormatZaman(k.kapanisZamani);
-                let sureStr = k.sure != null
-                    ? (k.sure < 60 ? (k.sure + ' dk') : (Math.floor(k.sure / 60) + ' sa ' + (k.sure % 60) + ' dk'))
+            // OTURUMA GRUPLA: Ayni masa + ayni acilisZamani = ayni oturum
+            // acilisZamani yoksa (eski kayitlar) kendi ID'siyle tek basina kalir
+            let oturumlar = {};
+            liste.forEach(k => {
+                let anahtar = k.acilisZamani
+                    ? (k.masaNo + '_' + k.acilisZamani)
+                    : ('tek_' + (k._id || Math.random()));
+                if (!oturumlar[anahtar]) {
+                    oturumlar[anahtar] = { odemeler: [], masaNo: k.masaNo, acilisZamani: k.acilisZamani };
+                }
+                oturumlar[anahtar].odemeler.push(k);
+            });
+
+            // Her oturum icin en gec kapanis zamanina gore sirala, her oturumu kendi icinde eskiden yeniye sirala
+            let oturumListesi = Object.values(oturumlar).map(o => {
+                o.odemeler.sort((a, b) => (a.kapanisZamani || 0) - (b.kapanisZamani || 0));
+                o.sonKapanis = Math.max(...o.odemeler.map(x => x.kapanisZamani || 0));
+                o.toplam = o.odemeler.reduce((t, x) => t + (x.toplam || 0), 0);
+                o.toplamNakit = o.odemeler.reduce((t, x) => t + (x.nakitMiktar || 0), 0);
+                o.toplamKredi = o.odemeler.reduce((t, x) => t + (x.krediMiktar || 0), 0);
+                // Oturum kapandi mi? Son odemeden tip 'kismi-' ile baslamiyorsa kapandi demektir
+                let son = o.odemeler[o.odemeler.length - 1];
+                o.kapandi = !(son.odeme && son.odeme.startsWith('kismi-'));
+                // Sure: acilis -> son kapanis
+                if (o.acilisZamani) {
+                    o.sure = Math.round((o.sonKapanis - o.acilisZamani) / 60000);
+                } else {
+                    o.sure = son.sure;
+                }
+                return o;
+            }).sort((a, b) => b.sonKapanis - a.sonKapanis);
+
+            div.innerHTML = oturumListesi.map((o, i) => {
+                let acilisStr = o.acilisZamani ? gecmisFormatZaman(o.acilisZamani) : '—';
+                let kapanisStr = gecmisFormatZaman(o.sonKapanis);
+                let sureStr = o.sure != null
+                    ? (o.sure < 60 ? (o.sure + ' dk') : (Math.floor(o.sure / 60) + ' sa ' + (o.sure % 60) + ' dk'))
                     : '—';
 
-                let urunlerHTML = (k.siparisler || []).map(s => `
-                    <div class="gk-urun-satir">
-                        <span class="gk-urun-ad">${s.urun || '-'}<span class="gk-adet">x${s.adet || 0}</span></span>
-                    </div>
-                `).join('');
+                // Kismi odeme varsa rozet
+                let kismiSayi = o.odemeler.filter(x => x.odeme && x.odeme.startsWith('kismi-')).length;
+                let kismiRozet = kismiSayi > 0
+                    ? `<span style="background:#F4A832; color:white; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:900;">${o.odemeler.length} parca</span>`
+                    : '';
+
+                // Durum etiketi
+                let durumTag = o.kapandi
+                    ? '<span style="background:#D4EDDA; color:#3D8B60; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:900;">✓ KAPANDI</span>'
+                    : '<span style="background:#FDEBBF; color:#B07A00; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:900;">⏳ ACIK</span>';
+
+                // Finans ozeti (her oturumda goster)
+                let finansOzeti = `
+                    <div style="display:flex; gap:6px; margin-top:8px; padding-top:8px; border-top:1px solid #EDE0D4; flex-wrap:wrap;">
+                        ${o.toplamNakit > 0 ? `<span style="font-size:12px; color:#4A9B6F; font-weight:800; background:#D4EDDA; padding:3px 10px; border-radius:8px;">💵 ${o.toplamNakit} ₺ Nakit</span>` : ''}
+                        ${o.toplamKredi > 0 ? `<span style="font-size:12px; color:#B07A00; font-weight:800; background:#FDEBBF; padding:3px 10px; border-radius:8px;">💳 ${o.toplamKredi} ₺ Kart</span>` : ''}
+                    </div>`;
+
+                // Her odeme icin ayri blok (kismi odemeler ve son kapanis dahil)
+                let odemelerHTML = o.odemeler.map((k, idx) => {
+                    let zamanStr = gecmisFormatZaman(k.kapanisZamani);
+                    let tipLabel = '';
+                    if (k.odeme === 'kismi-nakit') tipLabel = '💵 Kismi Nakit';
+                    else if (k.odeme === 'kismi-kredi') tipLabel = '💳 Kismi Kart';
+                    else if (k.odeme === 'nakit') tipLabel = '💵 Nakit';
+                    else if (k.odeme === 'kredi') tipLabel = '💳 Kart';
+                    else if (k.odeme === 'parcali') tipLabel = '🧮 Parcali';
+                    else if (k.odeme === 'secili') tipLabel = '✅ Son Odeme';
+                    else tipLabel = k.odeme || '—';
+
+                    let sonRozet = (idx === o.odemeler.length - 1 && o.kapandi)
+                        ? '<span style="background:#3D8B60; color:white; padding:1px 7px; border-radius:8px; font-size:10px; font-weight:900; margin-left:6px;">FINAL</span>'
+                        : '';
+
+                    let urunler = (k.siparisler || []).map(s => `
+                        <div class="gk-urun-satir" style="display:flex; justify-content:space-between; padding-left:10px;">
+                            <span class="gk-urun-ad" style="font-size:13px;">${s.urun || '-'}<span class="gk-adet">x${s.adet || 0}</span></span>
+                            <span style="font-weight:700; color:#6B3A2A; font-size:13px;">${s.toplamTutar || 0} ₺</span>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <div style="background:#FDF6EC; border-radius:8px; padding:8px 10px; margin-bottom:6px; border:1px solid #EDE0D4;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:4px;">
+                                <span style="font-size:12px; font-weight:800; color:#6B3A2A;">${tipLabel}${sonRozet}</span>
+                                <span style="font-size:12px; color:#A08070; font-weight:700;">${zamanStr}</span>
+                            </div>
+                            ${urunler || '<div style="padding-left:10px; color:#A08070; font-size:12px;">Urun kaydi yok</div>'}
+                            <div style="text-align:right; margin-top:4px; font-size:13px; font-weight:900; color:${k.odeme && k.odeme.includes('nakit') ? '#3D8B60' : '#B07A00'};">${k.toplam || 0} ₺</div>
+                        </div>
+                    `;
+                }).join('');
 
                 return `
                     <div class="gk">
                         <div class="gk-baslik" onclick="govToggle('gi-${i}')">
-                            <div class="gk-sol">
-                                <span class="gk-masa">Masa ${k.masaNo || '-'}</span>
+                            <div class="gk-sol" style="flex-wrap:wrap; gap:6px;">
+                                <span class="gk-masa">Masa ${o.masaNo || '-'}</span>
+                                ${durumTag}
+                                ${kismiRozet}
                                 <span class="gk-sure">⏱ ${sureStr}</span>
                             </div>
-                            <div class="gk-tarih">${kapanisStr}</div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                                <span style="font-size:17px; font-weight:900; color:#6B3A2A;">${o.toplam} ₺</span>
+                                <span class="gk-tarih">${kapanisStr}</span>
+                            </div>
                         </div>
                         <div class="gk-detay" id="gi-${i}">
                             <div class="gk-detay-ic">
                                 <div class="gk-zaman-satir">
                                     <span class="gk-zaman-chip">🟢 Acilis: ${acilisStr}</span>
-                                    <span class="gk-zaman-chip">🔴 Kapanis: ${kapanisStr}</span>
+                                    <span class="gk-zaman-chip">🔴 ${o.kapandi ? 'Kapanis' : 'Son Odeme'}: ${kapanisStr}</span>
                                     <span class="gk-zaman-chip">⏱ Sure: ${sureStr}</span>
                                 </div>
-                                ${urunlerHTML || '<div class="gk-urun-satir"><span>Siparis kaydi yok</span></div>'}
+                                ${odemelerHTML}
+                                ${finansOzeti}
                             </div>
                         </div>
                     </div>`;
@@ -2658,4 +2980,5 @@
     </script>
 </body>
 </html>
+
 
